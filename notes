@@ -1,0 +1,104 @@
+20/4/20
+
+Rust is a an ahead of time compiled language, this means you can give the 
+compiled version to someone and they may run it even without having Rust
+installed.
+
+
+==================== CARGO ====================
+
+[create a project using cargo]
+
+>> cargo new test_project
+
+cargo is the package manager from rust it also can build the code.
+
+
+TOML (Toms obvious minimal language) is the format used by cargo config files.
+
+Rust packages == Crates
+
+[build project using cargo]
+
+>> cargo build
+
+(run inside the cargo project directory)
+
+ Creates an executable at project_directory/target/debug/test_project
+ can run executable as (inside project dir) ./target/debug/test_project
+
+the build triggers also the generation of a file called Cargo.lock,
+it just pins the exact dependencies.
+
+
+[compile and run using cargo]
+
+>> cargo run
+
+
+[check code but not compile]
+
+>> cargo check
+
+
+If ready for release you can use 
+
+>> cargo build --release 
+
+This runs a bunch of optimizations, creates exe at 
+project_directory/target/release
+
+================================================
+
+~~~~~~~~~~~~~~~~~~~~
+
+- import sintax
+
+use package::something;
+
+
+- variable declaration
+
+[Variables are inmutable by default in rust]
+
+let mut name_of_varaible = something;
+
+mut stands for mutable, if it wouldn't be placed we cant change the value
+of it.
+
+
+- calling associated functions of Types.
+
+Type::associated_method() associated functions are equivalent to static methods
+
+
+Mutable references are passed as &mut varirable name rather than &variable_name
+
+- Result type
+
+Rust has many different Result types a generic one and many specifics to each
+module, library
+
+Result types are enums, which means it has a fixed set of values that
+are called "variants"
+These variants are Ok and Err,
+
+ Ok --> stands for successful operation
+ Err --> provides info on why this failed.
+
+
+ - formating prints
+
+ they use the {} as place holders, we pass the variable not the reference
+ of it.
+
+ similar to python.
+
+
+
+
+
+
+
+
+
