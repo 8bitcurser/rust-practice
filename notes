@@ -143,6 +143,26 @@ let test: u32 = 320;
 we can reuse varaible names by shadowing, this is commonly used to convert one
 type into another
 
+its declaring a new variable with the name using the previous value to
+apply a transformation is not the same as making a mutable variable.
+
+this is shadowing
+
+let a = 1;
+let a = a + 2;
+
+This is not shadowing
+
+let a;
+a = a + 2; <= produces compile error
+
+
+This is not shadowing
+
+let mut a = 1;
+a = a + 2; <= although similar a will remain being mutable while using
+shadowing after transformation has been aplied the varaible is inmutable
+
 
 ---- looping
 
@@ -151,3 +171,10 @@ loop {
 } 
 
 generate an infinite loop that must be escaped with break keyword.
+
+
+---- constants
+
+const TEST: u32 = 100_000;
+
+they wont change the value as we used the const keyword
