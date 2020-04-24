@@ -307,4 +307,109 @@ Rust is an expression based language
 > Statements are instructions that do not return a value.
 > Expressions evaluate to a resulting value.
 
+varaible assignment -> statement
 
+in rust let x = y = 6 is not possible as the assingment of a varaible does not
+produce a return value
+
+
+== expressions do not include ending semicolons so if I add a ; to the end of
+an expession it wont return a value. Functions do not end with semi colons as
+they are expressions to rust
+
+
+function that returns a value
+
+
+fn five() -> i8 {
+        5 // notice the lack of semicolon, with it it wouldnt return
+}
+
+this expression will return the value 5, you may return early with the return
+keyword but return is synonymous to the last expression of the block inside the
+function declaration.
+
+
+fn multiply_by_two(x: i32) -> i32{
+        x * 2
+}
+
+
+numbers by themselves are also expressions.
+
+---- CONTROL FLOW
+
+if, else are expressions.
+
+the code inside each of this expressions is sometimes called "Arms" (like with
+match)
+
+control flow expressions can only evaluate bools having said that we can not do
+
+let number = 1;
+
+if number {
+        //code
+
+}
+
+this will produce an error. 
+
+
+combining control flow
+
+
+if number % 4 == 0 {
+        // smthng
+} else if number % 3 == 0 {
+        // smthn2
+}else{
+        //smthn 3
+}
+
+rust would execute the first arm that matches and wont keep checking
+
+this is possible in rust:
+
+let cond = true;
+similar to ternaries , this is possible as control flow is an expression and
+returns a value.
+
+let number = if cond {
+        5
+} else {
+        6
+};
+
+
+---- loops take 2
+
+three types, loop, for, while.
+
+
+break stops a loop but also allows us to return a value after it like
+
+let mut counter = 0;
+let result = loop {
+        counter += 1;
+        if counter == 10 {
+                break counter * 2;
+        }
+}
+
+a while loop requires some sort of conditional checking as in control flow
+this is why is not optimal for iteration over defined and static data such as 
+arrays a for loop would be better suited
+
+
+let a = [1, 2, 3, 4, 5]
+for element in a.iter() {
+        println!("{}", element);
+}
+
+way more performant and concise, for loops are just safer.
+
+but what if i would need to iterate over a range of items?
+
+Then the type Range would become handy as it provides a range of consequent
+numbers
