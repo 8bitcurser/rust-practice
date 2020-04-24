@@ -107,6 +107,7 @@ which will display a website with all the docs for each crate
 
 the html files are at project_directory/target/doc/project_name/index.html
 
+============================ RUST =============================
 
 ---- match expression
 
@@ -178,3 +179,132 @@ generate an infinite loop that must be escaped with break keyword.
 const TEST: u32 = 100_000;
 
 they wont change the value as we used the const keyword
+
+
+------------------------------------------------------------------
+
+23/4
+
+
+---- Data types
+
+                             unsigned    signed (positive, negative)
+                                      \ /
+                                       |  
+                         |- integers ---
+                         |- floating - (64, 32)   
+                         |- boolean
+                         |- char - four bytes in size, unicode scalar value
+                scalar - |
+             /
+data types --
+             \
+                compound - |- tuples
+                           |- arrays
+
+
+wrapping on ints, if you want to put 256 on a u8 variable (
+numbers go from 0 to 255) then instead of storing 256 it stores 1. (it goes all
+the way round)
+
+=== signature range of numbers for int ===
+unsigned 0 to 2^n - 1
+signed - 2^(n-1) to 2^(n-1) - 1
+
+
+--- tuples
+
+they group different types together, but they have a fixed size and the type
+of each element must be specified.
+
+let tup: (i32, f64, u8) = (500, 6.4, 1);
+
+if we do not specify the types rust is going to infer them so 
+
+let tup = (500, 6.4, 1); is also valid
+
+if we wanted to get the 6.4 out of tup we could do pattern matching to
+destructure the tuple as follows
+
+let (x, y, z) = tup;
+
+println!("{}", y) would return 6.4 as string
+
+this method is called Destructuring
+
+but we could also acquire each one of the elements individually from the
+original tuple by using its index.
+
+println!("{}", tup.1); => 6.4 being printed
+
+
+--- arrays
+
+Arrays differ from tuples, array elements must all be the same type. Arrays
+do have fixed sized like tuples 
+
+let arr = [1, 2, 3, 4];
+
+usually used when we rather have the data stored on the stack rather than the
+heap
+
+an array like those in python would be a vector but it is provided by the
+standard library
+
+an array with explicit size and element type
+
+let arr: [u8, 5] = [1, 2, 3, 4, 5];
+
+rust also lets us create an array of x elements with the same value as 
+follows:
+
+let arr = [3; 5];
+
+this will create an array of 5 elements with the value 3 assigned
+
+arr = [3, 3, 3, 3, 3]
+
+
+accesing data inside an array is done by indexing
+
+let arr: [u8, 5] = [1, 2, 3, 4, 5];
+arr[0];
+
+>> 1
+
+
+accesing elements out of index produces a runtime error
+
+arr[10]
+
+
+---- functions
+
+
+fn keyword
+snake case convention
+
+functions can be declared anywhere as long as they are declared
+
+
+parameters are part of the function signature and their type MUST be declared
+it can not be implied.
+
+fn some_func(x: i8, y: u8) {
+        println!("{}", -x);
+        println!("{}", y);
+}
+
+
+
+=====================================
+Rust is an expression based language
+=====================================
+
+---- expressions and statements
+
+
+> Statements are instructions that do not return a value.
+> Expressions evaluate to a resulting value.
+
+
