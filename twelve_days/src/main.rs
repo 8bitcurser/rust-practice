@@ -1,18 +1,34 @@
 fn main() {
     let nums = [
         ["first", "a partridge in a pear tree"],
-        ["second", "Two turtle doves"],
-        ["third", "three French hens"],
-        ["fourth", "Four calling birds"],
-        ["fifth", "five gold rings"],
-        ["sixth", "six geese a laying"],
-        ["seventh", "Seven swans a swimming"],
-        ["eighth", "eight maids a milking"],
-        ["ninth", "nine ladies dancing"],
-        ["tenth", "Ten lords a leaping"],
-        ["eleventh", "eleven pipers piping"],
-        ["twelfth", "Twelve drummers drumming"] 
+        ["second", "turtle doves,"],
+        ["third", "French hens,"],
+        ["fourth", "calling birds,"],
+        ["fifth", "gold rings,"],
+        ["sixth", "geese a laying,"],
+        ["seventh", "swans a swimming,"],
+        ["eighth", "maids a milking,"],
+        ["ninth", "ladies dancing,"],
+        ["tenth", "lords a leaping,"],
+        ["eleventh", "pipers piping,"],
+        ["twelfth", "drummers drumming,"] 
     ];
+
+    let numbers = [
+        "",
+        "two",
+        "three",
+        "four",
+        "five",
+        "six",
+        "seven",
+        "eight",
+        "nine",
+        "ten",
+        "eleven",
+        "twelve"
+    ];
+
     for day in 0..12 {
         println!(
             "On the {} day of Christmas my true love gave to me",
@@ -20,11 +36,11 @@ fn main() {
         );
        for verse in (0..day+1).rev(){
         if day != 0 && verse == 0{
-            print!("and ");
+            print!("and");
         }
-            println!("{}", nums[verse][1]);
+            println!("{} {}", numbers[verse], nums[verse][1]);
        }
-       println!("=========================");
+       println!("=========================\n");
     }
 
 }
