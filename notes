@@ -413,3 +413,78 @@ but what if i would need to iterate over a range of items?
 
 Then the type Range would become handy as it provides a range of consequent
 numbers
+
+---- Ownership
+
+this feature allows rust not to have a garbage collector.
+
+== Brief desc:
+
+"Mem is managed through a system of ownership that has a set of rules
+which are checked by the compiler at compile time, therefor not affecting
+runtime performance at all."
+
+
+stack -> lifo, the last to be put in is the last to be pulled out.
+heap -> the heap is not organized the OS looks some place where it can
+locate the size of data we requested and gives us the mem addr location.
+
+The stack has certain constraints, fixed data sizes can be stored at the stack
+while unknown sizes must be allocated inside the heap
+
+adding data to the stack is faster than the heap, the OS doesn't need to look 
+for a space in memory big enough it just puts it first, same goes with 
+retriving data, with the heap you gotta follow the pointer and at the stack you 
+just retrieve whatever is first.
+
+
+When a function is called whatever was passed and whatever its inside is
+pushed into the stack, when its done its removed from the stack 
+(This is what allows recursivity to exist)
+
+
+In the case of the heap it is a common practice to keep control what duplicated
+data goes to the heap and to swipe the unused data, this is done by the garbage
+collector periodically or in our case by the ownership.
+
+
+== Rules of ownership
+
+1. Each value in rust has a variable that is called its owner
+2. There can only be one owner at a time.
+3. When the owner goes out of scope, the value will be dropped.
+
+
+All the previous data types are stored in the stack, but the String data type
+is stored in the heap.
+
+String literals are immutable. ~
+
+string literals are let s = "blah blah blah"
+String types are those that we used to store user input.
+
+But the trade off is performance string literals are more performant given the
+imutability while the string types are not.
+
+String types support mutability by being stored in the heap, mainly as we don't
+know how much memory it will take. 
+
+
+So this memory is requested from the OS at runtime and it must be given back to
+the OS.
+
+so with String::from("this is a string"); we are doing the first part the second
+one is usually handeled by the garbage collector, like in python.
+
+But rust says FUCK IT, ill allocate this and when its out of scope ill return
+it.
+
+Rust, the sneaky industrious bastard, calls a function called drop when the 
+string goes out of scope. This kinda simplifies the whole C mambo jampo of 
+
+allocate() and free()
+
+
+
+
+
