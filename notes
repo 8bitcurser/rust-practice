@@ -485,6 +485,50 @@ string goes out of scope. This kinda simplifies the whole C mambo jampo of
 allocate() and free()
 
 
+Strings are a bit more complex than an int in terms of what the value is made 
+of, ints have fix sizes and are stored in the stack. BUT strings is composed of
+{a pointer to the content, a length, a capacity} all of it stored in the stack.
+the content itself is stored at the heap. length ≠ capacity, length is how much
+mem it currently takes and capacity is how much mem the OS has given. 
+
+
+if we do:
+
+let s1 = String::from("hello");
+let s2 = s1;
+
+s2 will hold a copy of the {pointer, length, and capacity} not the content and
+produce one different. that would be the case with simpler data types like ints
+
+let x = 5;
+let y = x;
+y will be 5 not a pointer to x that stores the value of 5.
+
+
+Rust doesnt "copies" the content meaning it doesnt allocate a new set of mem
+and places the content inside there cause it will be expensive and kinda
+pointless. For big data sets the cost will be high on the runtime perf.
+
+
+Having said that the drop function could meet a problem which would be as 
+soon as s1 goes out of scope it will free the memory on the heap that now s2
+also points, which would result in a bug and when s2 goes out of scope it will 
+drop again the same memory that will cause a double free that is a memory
+corruption.
+
+Rust instead does something smarter as soon as s2 owns the value of s1, s1 is
+no longer considered valid, so it doesnt free anything when s1 goes out of
+scope.
+
+In other languages this would be called a shallow copy, as rust copies
+everything but the content, BUT as rust invalidates the first variable this is
+called a MOVE.
+
+Rust also wont create deep copies automatically, as to safe keep the perf
+on runtime.
+
+
+
 
 
 
