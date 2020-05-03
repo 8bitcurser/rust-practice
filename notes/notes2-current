@@ -1,0 +1,25 @@
+---- Slice Type
+
+Like python lets you reference a series of contiguous elements in a collection
+rather than the whole thing.
+
+
+let s = String::from("hello world");
+let hello = &s[..5];
+let world = &s[6..];
+
+let s = "Hello" is a stirng literal, s will be of the type &s and is immutable
+given that &s are immutable references.
+
+if we want functions to be able to take stirng literals and normal strings
+the type of the function paramenter should be &str as it supports both of them
+and not only strings like &String
+
+
+we can slice other things such as arrays like the following
+
+let a = [1, 2, 3, 4, 5];
+let slice = &a[..3];
+
+
+---- Structs
