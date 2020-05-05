@@ -23,3 +23,70 @@ let slice = &a[..3];
 
 
 ---- Structs
+
+similar to tuples can have different types but do not need indexing to acquire
+each element.
+
+struct User {
+        username: String,
+        email: String,
+        sign_in_count: u64,
+        active: bool
+}
+
+
+let user = User {
+        email: String::from("tom@test.com"),
+        username: String::from("tomowl"),
+        active: true,
+        sign_in_count: 1
+};
+
+user1.email = String::from("another@email.com");
+
+All the struct is mutable, the expression can be returned in a function
+
+fn build_user(email: String, username: String) -> User {
+        User{
+                email: email, // this is annoying to repeat
+                username: username, // as well as here
+                active: true,
+                sign_in_count: 1
+        }
+}
+
+
+this is a better more "simple implementantion" if the parameter is named as the
+field. This is called ~~ filled init shorthand syntax ~~
+
+fn build_user(email: String, username: String) -> User {
+        User {
+                email,
+                username,
+                active: true,
+                sign_in_count: 1
+        }
+}
+
+
+making a struct instance out of another struct instance
+
+let user2 = User {
+        email: String::from("user2@email.com");
+        username: String:from("username2");
+        ..user1
+}
+
+This copies all the remaining data from user1 that hasn't been explictly
+modified.
+
+We could go full explicit doing active: user1.active and 
+sign_in_count: user1.sign_in_count but... kinda boring isn't it?
+
+
+
+
+
+
+
+
