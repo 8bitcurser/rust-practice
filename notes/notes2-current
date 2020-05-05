@@ -36,7 +36,9 @@ struct User {
 
 
 let user = User {
-        email: String::from("tom@test.com"),
+        email: String::from("tom@test.com"), // we dont use &str cause when the
+                                            // struct goes out of scope we want
+                                            // the data to go out as well.
         username: String::from("tomowl"),
         active: true,
         sign_in_count: 1
@@ -84,9 +86,30 @@ We could go full explicit doing active: user1.active and
 sign_in_count: user1.sign_in_count but... kinda boring isn't it?
 
 
+--- tuple structs
+
+Like tuples but... different.
+
+useful when you need a special type of tuple that is different from all the
+others.
+
+Awesome for something like a vector.
+
+struct Vector(i32, i32, i32);
+struct Color(u32, u32, u32);
+
+let origin = Vetor(0, 1, 2);
+let red = (255, 0, 0);
 
 
+Color and Vector are different types, even if they are tuple structs.
 
 
+--- unit-like structs.
+
+Structs that have no fields, kinda like the base Exception class
+
+In rust they are similar to (). Useful to implement a trait that doesn't need
+to store any data.
 
 
