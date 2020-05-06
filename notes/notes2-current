@@ -105,11 +105,161 @@ let red = (255, 0, 0);
 Color and Vector are different types, even if they are tuple structs.
 
 
---- unit-like structs.
+---- unit-like structs.
 
 Structs that have no fields, kinda like the base Exception class
 
 In rust they are similar to (). Useful to implement a trait that doesn't need
 to store any data.
+
+---- Enums
+
+
+are similar to algebraic data types.
+
+[If you can -enumerate- all posible values then its probably an enum]
+
+eg for ip addresses only v4 and v6
+
+enum IpAddrKind{
+        V4,
+        V6
+}
+
+
+
+let ipv4 = IpAddrKind::V4;
+
+
+V4 and V6 are the same type so we can write a function with the following
+signature
+
+fn route(ip_kind: IpAddrKind){
+        //stuff
+}
+
+and we may pass either v4 or v6
+
+route(IpAddrKind::V6);
+
+
+using it with a struct that represents an ip address
+
+struct IpAddr {
+        kind: IpAddrKind,
+        address: String,
+}
+
+
+let home_addr = IpAddr {
+        kind: IpAddrKind::V4,
+        address: String::from("127.0.0.1")
+};
+
+
+This could be even more concise and more elegant
+
+enum IpAddr {
+        V4(String),
+        V6(String)
+}
+
+let home_addr = IpAddr::V4(String::from("127.0.0.1"));
+
+// less code is better code
+
+each enum variant can have a ≠ type and amounts of associated data.
+
+for example and IPV4 is conformed of 4 digits that go from 0 up to 255
+
+while IPV6 can have HEX values represented by strings so a better more
+
+precise implementation of the previously stated would be.
+
+
+enum IpAddr {
+        V4(u8, u8, u8, u8),
+        V6(String)
+}
+
+and instanciated like this
+
+let home_addr = IpAddr::V4(127, 0, 0, 1);
+
+
+the standar library has an implementation for this but instead it makes the 
+type of V4 and V6 to structures called Ipv4Addr and Ipv6Addr respectively.
+
+
+Enum types can be whatever even other enums.
+
+
+Enums lets us create custom data types with a mix of many different things
+like:
+
+enum Message {
+        Quit, // unit struct
+        Move {x: i32, y: i32}, // anonymous struct
+        Write(String),
+        ChangeColor(u8, u8, u8), //tuple representing RGB
+}
+
+
+we can also implement methods for our enums with the impl block like
+the struct.
+
+---- The option enum
+
+
+[For most languages null means that there is no value at a place, 
+like python that None is something, Rust doesnt have this as it can
+lead to mistakes]
+
+Null is needed in most scenarios thats why rust as it doesnt implement
+a null pointer it has the Option enum which tells you whether something is
+present or not.
+
+== Read on Option<T> implmentation and usage ==
+
+<T> means any Type
+enum Option<T> {
+        Some(T),
+        None,
+}
+
+let some_num = Some(5);
+let some_string = Some("A string");
+
+// Rusts compiler doesnt know what type Some will be by looking at None
+// so we gotta specify it.
+let absent_number: Option<i32> = None;
+
+
+To be able to use something inside a Some(T) we gotta extract the T first
+if not Rust won't be able to use it. This lets you catch a problem that would
+be using a null when you actually where expecting a value.
+
+
+If you want to have something be None you gotta work it, meaning you have
+to create the type of that value Option<T> then when you using that value
+
+you gotta explicitly handle that scenario like with match <- super cool.
+
+
+If you use an Option<T> be ready to handle each and every case.
+
+match and Option<T> are match made in heaven.
+
+
+--- match control flow operator.
+
+
+
+
+
+
+
+
+
 
 
