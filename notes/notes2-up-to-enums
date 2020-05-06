@@ -254,7 +254,174 @@ match and Option<T> are match made in heaven.
 --- match control flow operator.
 
 
+match let us see if a value "matches" against a pattern that can be 
+almost anything, another value, a variable name, a regex, whatever.
 
+
+enum Coin {
+        Penny,
+        Nickel,
+        Dime,
+        Quarter
+}
+
+
+fn value_in_cents(coin: Coin) -> u8 {
+        match coin {
+                Coin::Penny => 1,
+                Coin::Nickel => 5,
+                Coin::Dime => 10,
+                Coin::Quarter => 25
+        }
+}
+
+So what it does is check whether a coin is one of the instances and 
+based on that return the adequate value... pretty neet
+
+
+
+in difference to ifs match doesnt need for the expression to return
+a bool it just needs to return something, 
+
+if the value coin in this match expression doesnt match one arm, it moves
+to the next
+
+
+matching with binding
+
+
+enum UsState {
+        Alabama,
+        Alaska,
+        //
+}
+enum Coin {
+        Penny,
+        Nickel,
+        Dime,
+        Quarter(UsState)
+}
+
+
+fn value_in_cents(coin: Coin) -> u8 {
+        match coin {
+                Coin::Penny => 1,
+                Coin::Nickel => 5,
+                Coin::Dime => 10,
+                Coin:Quarter(state) => {
+                        println!("{}", state);
+                        25
+                }
+        }
+}
+
+
+value_in_cents(Coin::Quarter(UsState::Alaska));
+
+the pattern matches for a value that is binded to another value
+meaning coin is also assoiated to state, but only in one case as the
+other variants of the enum coin are not binded to the enum UsState
+
+
+-----
+
+
+how would enums and option<t> work together:
+
+fn plus_one(x: Option<i32>) -> Option<i32> {
+        match x {
+                // None must always be covered!
+                None => None,
+                // we are handling the <T> from the Option<T>
+                // the place holder for the <T> is the i
+                Some(i) => Some(i+1)
+        }
+}
+
+
+let five = Some(5);
+let six = plus_one(five);
+// This wont explode cause None is part of the enum Option<T>
+// therefor None is consider of the same type.
+let none = plus_one(None);
+
+
+matching is exhaustive but we can discard some options
+
+let some_u8 = 0u8;
+match some_u8 {
+        1 => println!("one"),
+        3 => println!("three"),
+        5 => println!("five"),
+        _ => ()
+}
+
+
+rust would ask us to consider all cases but we dont want to we just want
+1, 3, 5 and the rest can go fuck themselve so for all the other cases we
+do _ which rust automatically corresponds to all other cases besides the
+ones we specify
+
+
+But if we care for just one scenario, and not many we dont need the match
+we can use the if let pattern
+
+-- if let pattern.
+
+so in the previous pattern lets re write it just to care for the case
+where some_u8 is equal to 3
+
+so
+
+let some_u8 = Some(0u8);
+match some_u8 {
+        Some(3) => prinln!("Three!"),
+        _ => ()
+}
+
+its kinda extensive
+
+
+so if let lets you write it simpler
+
+if let Some(3) = some_u8 {
+        println!("Three");
+}
+
+works the same wayy as match patter + exp = some code
+
+its the asme as saying if some_u8 is a Some with the value 3 do this.
+
+
+syntax sugar babyyy.
+
+
+if let also can have an else that would be the equivalent to the following
+situation (using the  _ => ())
+
+let mut count = 0;
+
+match coin {
+        Coin::Quarter(state) => println!("Indiana babyy"),
+        _ => count += 1
+}
+
+but with if let:
+
+let mut count = 0;
+if let Coin::Quarter(state) = coin {
+        println!("Indiana babyy");
+} else {
+        count += 1;
+}
+
+
+match is a bit more exhaustive, picking one or the other should be thought
+through and not just picking the cutest
+
+
+if logic with match seems to verbose for the situation an if let may be
+best.
 
 
 
