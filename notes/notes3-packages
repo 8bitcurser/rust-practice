@@ -1,0 +1,105 @@
+packages -> cargo feature to build, test and share crates.
+crates -> a tree of modules that produces a library or executable.
+modules and use -> define scope and privacy paths.
+paths -> how to name something (struct, function, module)
+
+
+
+--- crates
+
+they have crate roots, source file that the compiler starts from and makes
+up the root modules of the crate.
+
+package = {crates} which has a Cargo.toml that shows how to build the crate/s
+
+package must contain 0 or 1 library crate but as many crate binaries 
+as desired, but at least 1 must be included (lib or bin)
+
+we create a package by doing
+
+> cargo new <project>
+
+by convention the src/main.rs is where the crate root of a binary crate is 
+(with the same name of the package <project>)
+while src/lib.rs if present the package contains a library crate with the
+same name as the package (<project>)
+
+
+this root files are passed down to rustc to build the lib or bin.
+
+cargo > src + Cargo.toml > rustc 
+
+
+if a package contains a lib.rs and a bin.rs it will generate two crates
+one lib and one bin but if the package contains many binaries then they must
+be places at src/bin/ and each will be a separate crate.
+
+
+---- from the shadow I bring you to the light
+
+"use" to bring something into scope.
+"pub" to allow something from withing to be used.
+
+
+>> creating a library
+
+cargo new --lib <library_name>
+
+
+
+module definition with the mod keyword, we may define many modules
+at the same file
+
+mod module {
+        mod sub_module {
+                fn function1() {}
+                fn function2() {}
+                enum bleh
+                struct blah
+                const etc
+                trait blih
+        }
+
+        mod sub_module_2 {
+                // ..
+        }
+}
+
+the lib.rs or main.rs as previously state are crate roots and within their
+content is what will form a module named crate at the root of the 
+crates module structure aKa module tree.
+
+
+paths to modules can be absolute or relative, abs from the root, rel from
+the current module and uses self, super or another identifier from the
+current module.
+
+
+either abs or rel path must be separated by :: 
+
+
+modules allow us to define rust privacys boundary
+
+
+by default all is private unless is stated to be public.
+
+items in parent modules cant use private items inside child modules,
+but modules in child modules can use items in their ancestors module.
+
+
+child modules hide their implementation details but the child modules can see
+the context in which they are defined. 
+
+super is like .., it elevates the scope by 1
+
+
+
+structs can be made public but we have to explictly declare its
+items as pub too
+
+
+if not all items within a struct are public then we will have to implement
+an associated function that builds the stuct adequately, if we don't 
+provide it we woun't be able ot build the struct.
+
+if we make an enum pub all within it will be pub
