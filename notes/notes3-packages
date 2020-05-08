@@ -103,3 +103,150 @@ an associated function that builds the stuct adequately, if we don't
 provide it we woun't be able ot build the struct.
 
 if we make an enum pub all within it will be pub
+
+
+--- bringing stuff into scope
+
+writing 
+
+crate::module::sub_module::bleh is long and repetitive we can bring
+the sub module into scope and call its functions without all that prefix
+by using the use keyword eg:
+
+use crate::module::sub_module
+
+then we just do 
+
+bleh();
+
+nicer.
+
+
+use also checks for privacy
+
+
+relative paths with use are set like this:
+
+use self::module::blah
+
+notice the self statement 
+
+this would be an scenario like the following
+
+mod module {
+       pub mod blah {
+        pub fn blih(){}
+        }
+}
+
+use self::module::blah
+
+pub fn bleh() {
+        blah::blih();
+}
+
+
+the self keyword will probably removed from rust eventually as its 
+actually an inconsistency in the code.
+
+
+we dont make full imports meaning
+
+use self::module::blah::blih
+
+cuase we wanna know at first sight the method was not define at the
+crate and was imported
+
+
+we can alias imports with the as keyword
+
+
+use module::submodule::bleh as Bleh
+
+---- re exporting
+
+we bring it from another scope but makit public from ours so someone
+may use it from ours.
+
+this is done by doing 
+
+pub use
+
+for eg we bring into our code
+
+use crate::module::submodule::bleh
+
+but someone using our crate may require those functions as well so we
+
+instead can do 
+
+pub use crate::module::submodule::bleh;
+
+its also useful to expose our modules publicly
+
+---- making imports more short
+
+use std::io;
+use std::cmp::Ordering;
+
+is equal to
+
+use std::{io, cmp::Ordering}; is a shorthand that is called nested paths
+
+---- glob operator
+
+we can bring everything public from a module by using the glob operator
+
+use std::collections::*; -> brings all.
+
+
+---- moving code to their own files
+
+
+this works for bin crates and lib crates
+
+
+we can move our bleh module to its own file bleh.rs
+
+
+at the lib.rs
+
+
+mod bleh {
+        // we are re exporting the module so it can be used by our fn
+        // outside.
+        pub use crate::bleh;
+}
+
+pub fn call_some_bleh() {
+        bleh::call_bleh();
+}
+
+
+at bleh.rs
+
+pub mod bleh {
+        pub fn call_bleh(){}
+}
+
+
+if bleh would be a namespace for other modules we should create a folder
+bleh/  and inside have the differnet modules the import will remain the same
+
+use crate::bleh::whatever;
+
+but at the src/bleh.rs we should have a declaration
+
+of those sub files lke
+
+pub mod whatever; // this tells rust to load the content of the module
+                  // from another file, with the same name as the module
+
+
+the tree would look like
+
+src/
+   |- lib.rs mod bleh; and pub use crate::bleh::whatever;
+   |- bleh.rs pub mod whatever;
+   |- bleh/
+        |- whatever.rs // some code
