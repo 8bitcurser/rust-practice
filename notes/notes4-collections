@@ -1,0 +1,130 @@
+---- collections
+
+data types on the standard library are pointed to be stored at the heap
+this way the amount of data doesn't need to be known during compilation.
+Allowing growth or reduction of memorize size during run time.
+
+The three main data types handled at the collections library are
+
+vectors, store an undefined number of values next to each other.
+
+strings, {characters}
+
+hash maps, assocaites a value with a key its an implementation of a more
+general data type called map
+
+
+---- Vector
+
+It allows to store more tahn one value in a single data structure, all 
+next to each other in memory, but all the values must be of the same type.
+
+Vec<T>
+
+// we need to specify the type of the vector items.
+let vector: Vec<i32> = Vec::new();
+
+-> vectors are implemented using Generics
+
+
+Specifying the type is not always necessary as Rust can imply the type
+of the vector when a value is added to it. On the wild its common to 
+always see a vector initialized with certain values with the shorthand vec!
+
+let vector = vec![1, 2, 3];
+
+Rust will think Hey! I have some i32 values here that i need to store so
+this vector must be i32 as well.
+
+adding to a vector can be done with the push method
+// check that we need to make it mutable as to be able to receive a push
+let mut v = Vec::new();
+v.push(1);
+v.push(2);
+
+as any other data type when the vector goes out of scope it gets cleansed
+with all of its stored data.
+
+
+we may retrieve data from a vector by using indexing or the get method
+
+let v = vec![1, 2, 3, 4, 5, 6];
+// we generate a varaible that will hold a pointer to an i32
+// and we pass the pointer of the value store at the index 2
+// of the vector
+let third: &i32 = &v[2];
+
+
+// here we just pass the index of the element and we use match
+// to capture it. get returns an Option<T> thats why we can use the
+// None type.
+match v.get(2) {
+        Some(third) => println!("{}", third),
+        None => println!("Not Found")
+}
+
+if we ref an index that doesnt exist the program will panic if we use
+get it will just obtain None.
+
+
+You can not retrieve with indexing [immutable ref]
+from a mutable vector and then push to it as the borrowing rules may
+be affected, it cares as the index will change and we are referencing by index.
+
+
+The other explanation is if we add something to the vector it may need to ask
+for a bigger chunk of memory and move everything to another place as all the
+elements are in contiguos memory addresses, if we ask for the first element ref
+and then push to the vector and the vector has to be moved to another chunk
+the previously stated ref is invalid, so to avoid this rust applies the borrow
+rules.
+
+iterating over vector elements
+
+let v = vec![1, 2, 3];
+
+for i in &v {
+        println!("{}", i);
+}
+
+
+it would also allow this:
+
+let mut v = vec![1, 2, 3];
+
+for i in &v {
+        // deferencing
+        *i += 50;
+}
+
+
+if we need to store different data types on a vector we can wrap them on an
+enum and store the instance of the enum on the vector, this respects the rule
+all types from an enum are from the same type, even if the hold different
+things
+
+enum SpreadsheetCell {
+ Int(i32),
+ Float(f64),
+ Text(String),
+
+}
+
+let row = vect![
+        SpreadsheetCell::Int(3),
+        SpreadsheetCell::Float(4.56),
+        SpreadsheetCell::Text(String::from("blue"))
+]
+
+
+This is for rust to know how much mem in needs to ask for.
+problem solved
+
+
+Now we have different types stored but we cannot provide a general solution
+for handling each one, so thats why we have match. So we can handle 
+each subtype individually.
+
+pop is used to remove elements from a vector, just as push adds them to the 
+bottom of the vector, pop does the same extracting the last one and returning
+it.
