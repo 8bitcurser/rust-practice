@@ -1,4 +1,4 @@
----- collections
+--- collections
 
 data types on the standard library are pointed to be stored at the heap
 this way the amount of data doesn't need to be known during compilation.
@@ -128,3 +128,6 @@ each subtype individually.
 pop is used to remove elements from a vector, just as push adds them to the 
 bottom of the vector, pop does the same extracting the last one and returning
 it.
+
+
+
