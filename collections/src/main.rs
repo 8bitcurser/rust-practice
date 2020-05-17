@@ -1,9 +1,9 @@
 // I had to name the module as the file
 mod mean_mode;
-
+mod pig_latin;
 // after bringin the namespace use pub use to name the module inside the file
 pub use crate::mean_mode::{mean, mode};
-
+pub use crate::pig_latin::pig;
 fn main() {
     let arr = [1, 2, 3, 4, 5];
     // send reference of arr
@@ -13,4 +13,7 @@ fn main() {
     // send reference of arr_mode
     println!("The mode is {}", mode::mode(&arr_mode));
     println!("The array used was {:?}", arr_mode);
+
+    println!("{}", pig::pig(String::from("apple")));
+    println!("{}", pig::pig(String::from("potatoe")));
 }
