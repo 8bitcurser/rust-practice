@@ -20,10 +20,29 @@ fn main() {
 
     println!("{}", pig::pig(String::from("apple")));
     println!("{}", pig::pig(String::from("potatoe")));
-    let mut company = HashMap::new();
-    let mut dep_people: Vec<String> = vec![String::from("blah")];
-    company.insert("Test", &mut dep_people);
-    abm::add("Bleh", &mut company);
-    // company.insert(String::from("test"), &dep_people);
+
+    let mut company: HashMap<String, Vec<String>> = HashMap::new();
+    abm::add_person_to_dept(
+        "IT".to_string(),
+        "Jensen Douglas".to_string(), &mut company);
+    abm::add_person_to_dept(
+        "HR".to_string(),
+        "Jeremy Perriot".to_string(), &mut company);
+    abm::add_person_to_dept(
+        "HR".to_string(),
+        "Laura Abbot".to_string(), &mut company);
+    abm::add_person_to_dept(
+        "HR".to_string(),
+        "Aaron Godstein".to_string(), &mut company);
+    abm::get_by_dept(
+        "HR".to_string(),
+        &mut company
+    );
+    abm::get_by_dept(
+        "Accounting".to_string(),
+        &mut company
+    );
+
+    abm::get_all(&mut company);
     
 }
