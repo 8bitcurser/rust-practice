@@ -18,6 +18,21 @@ pub mod abm{
             }
 
     }
+
+    pub fn fuzzy_add(
+        input_: String, company: &mut HashMap<String, Vec<String>>) {
+        let string_iter = input_.split_whitespace();
+        let mut person_dept: Vec<String> = Vec::new();
+        for word in string_iter {
+            if word != "Add".to_string() && word != "to".to_string() {
+                person_dept.push(word.to_string())
+            }
+        }
+        add_person_to_dept(
+            person_dept[1].to_string(),
+            person_dept[0].to_string(), company);
+    }
+
     pub fn get_all(company: &mut HashMap<String, Vec<String>>) {
         let mut departments: Vec<String> = Vec::new();
         for dept in company.keys() {

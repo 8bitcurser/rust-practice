@@ -1,0 +1,222 @@
+---- Error handling
+
+Rust makes a distinction between errors, recoverables and unrecoverables. 
+Most languages do not distinct between one another.
+
+Unrecoverables --> symptom of bug (accessing forbidden data)
+Recoverables --> handled (trying to load an unexistant file)
+
+Python for example uses exceptions to handle both of them. 
+
+Rust on the other hand uses the Result<T, E> type for recoverables and the
+panic! macro to stop execution on unrecoverables.
+
+--- Unrecoverables
+
+panic! macro -> program prints failure message, unwinds and clean up the stack
+and quit.
+
+"unwinding" means goin up the stack and clean up all data from functions it 
+encounters. This is expensive in computation setting the panic to abort just
+kills the program but doesnt clean up the memory.
+
+-- Activating Back trace
+
+>>> RUST_BACKTRACE=1 cargo run
+
+
+--- Recoverables with Result<T, E>
+
+The result enum hast two variants Ok and Err. T, E are generic types T
+represents the type of the value that will be returned on a success meaning
+the Ok variant, and E represents the type of error that will be returned on a
+Err variant. 
+
+
+
+e.g.
+
+
+use std::fs::File;
+
+fn main() {
+    let f = File::open("hello.txt");
+    let f = match f {
+        Ok(file) => file,
+        Err(error) => {
+            panic!("Error opening the file {:?}", error)
+        }
+    }
+}
+
+
+we dont need to import the result as its added by the prelude
+
+we may match on different type of errors, something may fail for different
+reasons.
+
+use std::fs::File;
+use std::io::ErrorKind; // notice we are importing the error kind type
+
+fn main() {
+    let f = File::open("hello.txt");
+    let f = match f {
+        Ok(file) => file,
+        Err(error) => match error.kind() {
+            ErrorKind::NotFound => match File::create("hello.txt") {
+                Ok(fc) => fc,
+                Err(error) => panic!("Problem creating the file")
+            },
+            other_error => panic!("Problem opening the file {:?}", other_error),
+        },
+    };
+}
+
+
+ a more concise representation of this code.
+
+
+use std::fs::File;
+use std::io::ErrorKind;
+
+fn main() {
+    let f = File::open("hello.txt").unwrap_or_else(|error| {
+        if error.kind() == ErrorKind::NotFound {
+            File::create("hello.txt").unwrap_or_else(|error| {
+                panic!("Problem creating the file: {:?}", error);
+            }) 
+        } else {
+            panic!("Problem opening the file {:?}", error);
+        }
+    });
+
+}
+
+
+-- unwrap
+
+is a simpler way to use Result without being so verbose as with the previous
+match clauses
+
+on a Ok returns the value on a Err it panics
+
+
+fn main() {
+    let f = File::open("hello.txt").unwrap();
+}
+
+
+If an err appears it won't be handled gracefully it will just explode.
+
+-- expect
+
+expct its pretty similar but lets us modify the error message
+
+fn main() {
+    let f = File::open("hello.txt").expect("Failed to open hello.txt");
+}
+
+--- Error propagation
+
+if a function fails pass the error to the calling function <- error propagation
+
+This is done in situations were the function that fails doesn't have a propper
+context to report the error, so it passes to the caller in hope it will provide
+more information.
+
+e.g.
+
+use std::io;
+use std::io::Read;
+use std::fs::File;
+
+
+fn read_username_from_file() -> Result<String, io::Error> {
+    # means it will return a Result<T, E>
+    let f = File::open("Hello.txt");
+    let mut f = match f {
+        Ok(file) => file,
+        Err(error) => return Err(e),
+    };
+    let mut s = String::new();
+    # last line therefor this will be returned
+    match f.read_to_string(&mut s) {
+        Ok(_) => Ok(s),
+        Err(e) => Err(e)
+    }    
+}
+
+-- error propagation with ? shortcut
+
+fn read_username_from_file() -> Result<String, io:Error> {
+    let mut f = File::open("hello.txt");
+    let mut s =String::new();
+    # the ? means that if Ok will return the Ok if Err it will return the Err
+    f.read_to_string(&mut s)?;
+    Ok(s)
+}
+
+its more concise but they do differ in something, error values that called go
+thrugh the from f(x) defined at the From trait of the std library. This f(x)
+converts one error type into another, this is helpful as the error captured
+from the read_to_string will be converted into the one specified at the return
+type which is an io:Error. The error type must have the from function
+implmented. 
+Specifically useful when a f(x) returns a type that represents all the ways
+a function may fall even if parts might fail for different reasons, we dont 
+care for the error read_to_string returned we care that the whole function 
+failed and the it ends up being an io::Error for the calling function
+
+the ? removes much of the boilerplate code.
+
+this could be more concise by chaining
+
+fn read_username_from_file() -> Result<String, io::Error> {
+    let mut s = String::new();
+    File::open("hello.txt")?.read_to_string(&muy s)?;
+    Ok(s)
+}
+
+
+a shorter way given that the read_to_stirng is a common operation that already
+implements the return at the fs module
+
+use std::io;
+use std::fs;
+
+fn read_username_from_file() -> Result<String, io::Error> {
+    # this returns the string if Ok or the Error if something happens,
+    # this is clearly not as explicit but works the same.
+    fs::read_to_string("hello.txt");
+}
+
+
+The ? can only be used with functions that return a Result
+
+
+--- Using types for common validations
+
+pub struct Guess {
+    value: i32,
+}
+
+impl Guess {
+    pub fn new(value: i32) -> Guess {
+        if value < 1 || value > 100 {
+            panic!("Guess value must be between 1 and 100, got {}.", value);
+        }
+        Guess {
+            value
+        }
+    }
+    pub fn value(&self) -> i32 {
+        self.value
+    }
+}
+
+this type would take the input and be passed to generate a new instance of
+the Guess type, so we dont need to repeat the "if" clause every time we 
+implement a new one, we just do it inside at the time of creation. 
+
+Functions are created having a "contract" with the values passed if they 
+violate the contract then it should panic

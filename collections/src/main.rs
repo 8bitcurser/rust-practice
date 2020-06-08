@@ -43,6 +43,9 @@ fn main() {
         &mut company
     );
 
-    abm::get_all(&mut company);
+    abm::fuzzy_add("Add James to Administration".to_string(), &mut company);
+    abm::get_all(
+        &mut company
+    );
     
 }
