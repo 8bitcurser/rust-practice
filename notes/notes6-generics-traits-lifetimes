@@ -146,4 +146,15 @@ fn main() {
 this will 
     >> print p3.x = 5, p3.6 = c
 
+using generics doesnt generate performance cost because the compiler looks all
+around the code finding where the generic type  was used and generates a
+specific code for each one of those generics for each type meaning i have 
+some 
 
+struc gen<T> {
+    // saraza
+}
+
+and around the code is used with f32 and i64 the compiler will create
+gen_f32 and gen_i64 at compile time and use them accordingly as not to loose
+performance. This is called monomorphization.
