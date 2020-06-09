@@ -1,0 +1,149 @@
+---- Generics
+
+Generics are used to avoid duplication of logic for different types, for e.g.
+Vec<T>, Result<T, E>, Option<T>, HashMap<K, V> these are all generics.
+
+Traits are associated to generics by providing behavior to them. 
+
+e.g a generic function that finds the largest either number or character.
+
+with a normal function I would have to declare two functions that do the same
+thing but on different input types, with generics it can be resolved like this.
+
+# We need to delcare the type before we use it as a parameter and return type
+# thats why we add <T> to the function signature. Any letter would do its just
+# convention to use T.
+fn largest<T>(list: &[T]) -> T {
+    let mut largest = list[0];
+    for &item in list.iter() {
+        if item > largest {
+            largest = item;
+        }
+    }
+    largest
+}
+
+fn main() {
+    let number_list = vec![34, 50, 25, 100, 65];
+    let result = largest(&number_list);
+    println!("The largest number is {}", result);
+    let char_list = vec!['y', 'm', 'a', 'q'];
+    let result = largest(&char_list);
+    println!("The largest char is {}", result);
+}
+
+
+
+wayyy more simple one function that covers both scenarios. 
+
+
+Generic structs
+
+# same as with functions we need to declare T at the struct signature in
+# order to use it.
+struct Pointer<T> {
+    x: T,
+    y: T
+}
+
+# as T is one type we can not mix types and expect the struct to work fine with
+# it, we cannot do Point {x:5, y:1.0} T is one thing or the other.
+fn main() {
+    let integer = Point { x: 5, y: 10 };
+    let float = Point { x: 1.0, y: 4.0 };
+}
+
+
+
+# if the pointer struct would need more than one type we could do
+
+struct Pointer<T, U> {
+    x: T,
+    y: U
+}
+
+fn main() {
+    let both_integer = Point{x: 5, y: 10};
+    let both_float = Point{x: 1.0, y: 4.0};
+    let mix = Point{x:5, y:1.0};
+}
+
+enums may have types as well, Result and Option and cases of those
+
+enum Option<T> {
+    Some(T),
+    None,
+}
+
+enum Reult<T, E>{
+    Ok(T),
+    Err(E)
+}
+
+
+# methods may also hold generic types
+
+struct Point<T> {
+    x: T,
+    y: T
+}
+
+# we need to declare T after impl so we can specify that we are implementing
+# methods on the type Point<T>. this way rust identifies that the <T> at
+# Point<T> means a generic Type and not a concrete one. This means we can have
+# specific methods for each type that receives Point
+# e.g
+# impl Point<f32> {
+#   fn distance_from_origin(&self) -> f32 {
+#       (self.x.powi(2) + self.y.powi(2)).sqrt()
+#    }
+# }
+# this method will only apply for f32 Points
+
+
+
+
+
+impl<T> Point<T> {
+    fn x(&self) -> &T {
+        &self.x
+    }
+}
+
+fn main() {
+    let p = Point { x: 5, y: 10};
+    println!("p.x = {}", p.x);
+
+}
+
+
+## The signature of a struct may define different generic types as those
+## used on its methods
+
+
+struct Point<T, U> {
+    x: T,
+    y: U
+}
+
+impl<T, U> Point<T, U> {
+    fn mixup<V, W> (self, other: Point<V, W>) -> Point<T, W> {
+        Point {
+            x: self.x,
+            y: other.y
+        }
+    }
+}
+
+
+fn main() {
+    let p1 = Point {x: 5, y: 10.4};
+    let p2 = Point {x: "Hello", y: 'c'};
+    let p3 = p1.mixup(p2);
+    println!("p3.x = {}, p3.y = {}", p3.x, p3.y);
+}
+
+this will 
+    >> print p3.x = 5, p3.6 = c
+
+
