@@ -270,6 +270,192 @@ pub fn notify<T: Summary>(item: T) {
 
 
 
+--- Trait as param
+
+we can use traits to write functions that accept different types.
+
+
+pub fn notify(item: impl Summary) {
+    println!("Breaking news! {}", item.summarize());
+}
+
+this function means we have a function that has a parameter item which is of 
+any type that has implemented the Summary trait and at its definition calls the
+summarize method from that parameter. As we called the summarize method we can
+call. If the method is called with a type that has not implemented the Summary
+trait it wont compile
+
 --- Trait bound
+
+pub fn notify<T: Summary>(item: T){
+    println!("Breaking news! {}", item.summarize());
+}
+
+this functions are equivalent the whole impl Summary is syntax sugar for this
+type of function signature.
+
+This syntax is called trait bound and its commonly used when we need a more 
+specific case, the impl Trait syntax is for simple cases.
+
+
+for e.g.
+
+pub fn notify(item1: impl Summary, item2: impl Summary){}
+
+could be rewritten to this which is more concise
+
+pub fn notify<T: Summary>(item1: T, item2: T) {}
+
+
+if item 1 and 2 shoudl have the same type trait bound would be the appropiate
+syntax, but! if they would be from different types we should use the impl
+syntax.
+
+
+we can even specify that a type may need to implement more than 1 trait at the
+same time this is done with the + symbol
+
+pub fn notify(item: impl Summary + Display) {}
+
+or 
+
+pub fn notify<T: Summary + Display>(item: T) {}
+
+
+but this may get quickly too verbose and unclear to read.
+
+like this scenario:
+
+    fn some_function<T: Display + Clone, U: Clone + Debug>(t: T, u: U) -> i32{}
+
+so Rust has the where clause
+
+    fn some_function<T, U>(t: T, u: U) -> i32 {
+        where T: Display + Clone,
+              U: Clone + Debug
+    }
+
+
+this is way more readable
+
+
+the impl Trait syntax may be used on the return, so the thing we are returning
+MUST have the trait specified implemented
+
+
+fn returns_summarizable() -> impl Summary {
+    Tweet {
+        username: String::from("horse_ebooks"),
+        content: String::from("Of course, as you probably already know"),
+        reply: false,
+        retweet: false
+    }
+    
+}
+
+The type doesnt matter as long the trait is implemented. Useful for iterators
+this syntax may only be used for returning one type at a time. 
+The code can not return two different types like in this case
+
+fn returns_summarizable(switch: bool) -> impl Summary {
+    if switch {
+        NewsArticle {...}
+    } else {
+        Tweet {...}
+    }    
+}
+
+
+this will generate a compile error as the function can return two different 
+types even if both implement the Summary trait.
+
+--- the largest method
+that we specified previously was throwing an error because the generic type
+didnt have the partial order trait implemented and couldn't compare between
+values.
+
+so the signature should be modified to 
+
+fn largest<T: PartialOrd + Copy>(list: &[T]) -> T {}
+
+we need both this traits because i32 and char are the types that we are
+comparing with this function and now that we specified that the function
+hold a generic type the list of values passed is not going to the stack but
+to the heap and to be able to copy a value from the list to a variable which
+we return we need the Copy trait implemented. Both i32 and char which are
+commonly stored in the stack have both implemented so if we specify the tratis
+rust know knows how to handle the comparisson and the copying to a variable.
+
+But maybe we dont wanna restrain the function to be used only to those types
+that have the Copy type implemented so we could change the Copy to the Clone.
+
+The clone is also implemented but it takes more processing time as it allocates
+more space in the heap, it would be inconvenient for larg sets of numbers,
+chars.
+
+
+another simpler way would be to instead return the reference to the largest
+value instead of returning it, that way we can remove the Copy Trati or clone
+Trait from the declaration.
+
+
+e.g.
+
+use std::fmt::Display;
+
+struct Pair<T>{
+    x: T,
+    y: T
+}
+
+impl<T> Pair<T> {
+    fn new(x: T, y: T) -> Self {
+        Self {
+            x,
+            y
+        }
+    }
+}
+
+
+impl<T: Display + PartialOrd> Pair<T>{
+    fn cmp_display(&self) {
+        if self.x >= self.y {
+            println!("The largest is {}", self.x);
+        } else {
+            println!("The largest is {}", self.y);
+        }
+    ]
+}
+
+
+### the  method (cmp_display) works only for those generic types that have
+implemented the Display and Partial ord traits upon the struct creation.
+
+### the new method works for any type but the other only for those that allow
+comparison and printing.
+
+### This is great we can implement the struct with whatever but unlock those
+methods only when the type is good enough for the function.
+
+--- blanket implementation
+
+blanket implementations are implementations of a trait on whatever type that 
+satifies a particular trait bound.
+
+impl <T: Display> ToString for T {
+
+}
+
+this means that ToString will be implemented on any T type that impements the
+Dispaly Trait.
+
+This Blanket implementation allows us to have the ToString trait on whichever
+Type applies this constraint without having to manually write every single case.
+
+Blanket implementations == Implementors.
+
+
+---- Lifetimes
 
 
