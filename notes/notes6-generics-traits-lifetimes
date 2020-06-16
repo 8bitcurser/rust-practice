@@ -458,4 +458,112 @@ Blanket implementations == Implementors.
 
 ---- Lifetimes
 
+All references in rust have a lifetime, lifetimes are the scope for which the
+reference is valid. This is mostly inferred and implicit. We must annotate 
+lifetimes when the lifetime references could be related in different ways. 
+
+Generic lifetime parameter are used so the compiler can be sure that the
+references will still be valid during runtime.
+
+Dangling references are solved with liftimes, which are references to data that
+we didn't intend to reference.
+
+as it would happen if we set a variable and inside a scope we make the variable
+hold the reference to another variable which is inside the particular scope
+once the scope ends the varaible will be pointing to nothing.
+
+Rust comapres the lifetimes with the borrow checker as to figure out up to when
+the ref is valid.
+
+
+e.g.
+
+fn main() {
+    let string1 = String:from("abcd");
+    let string2 = xyz;
+    let result = longest(string1.as_str(), string2);
+    println!("The longest is {}", result);
+}
+
+fn longest(x: &str, y: &str) -> &str {
+    if x.len() > y.len() {
+        x
+    } else {
+        y
+    }
+}
+
+this will produce an error at compile time saying that rusts expects a lifetime
+mostly because rust doesnt know which is going to return if x or y and we don't
+even know the concrete values passed to the function as well as the lifetimes
+(from within the longest function scope) And neither the borrow checker cause
+it doesnt know how x and y lifetimes relate to the one of the return, so to 
+fix this we need to add a generic lifetime parameters that asociates the 
+references.
+
+
+
+lifetime annotations examples
+
+&'a i32     // notice the 'a in both the letter could be anything usually used 
+&'a mut i32 // a letter in lowercase such as a, b, c, etc.
+
+a lifetime annotation doesnt change how much a reference lives but it allows
+rust to associate parameters lifetime to return lifetime.
+
+
+so longest would look like this
+fn longest<'a>(x: &'a str, y: &'a str) -> &'a str{
+    ..
+}
+
+this means both parameters have the same lifetime and the return will do the 
+same. Now rust knows that the return will live as long as the lifetime 'a
+
+which belongs to the same scope as x and y
+
+e.g. playing with the same function but changing the variables
+
+
+fn main() {
+    let string1 = String::from("long string is long");
+    let result;
+    {
+        let string2 = String::from("xyz");
+        result = longest(string1.as_str(), string2.as_str());
+        println!("{}", result);
+    }
+}
+
+with the same longest function as before and the lifetime annotations the 
+compiler doesn't squeal and the print is "long string is long"
+cause result lives long enought to be printed if we happened to move the print
+statemenet out of the inner scope we would face an error as the return lifetime
+would be smaller than the one of both parameters. But why? if the result will
+hold a ref to string1 that clearly outlives string2 and result. Its true but
+the compiler doesn't know that and as the assignment goes out of scope it panics.
+
+
+the return type lifetime reference must match atleast one of the lifetimes of
+the parameters passed, so in this scenario we dont need to specify both
+
+
+fn longest<'a> (x: &'a str, y: &str) -> &'a str {
+    x
+}
+
+the return type matches x which is the one being returned, all safe for the 
+compiler
+
+fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
+    let b = String::from("XYXZ");
+    b
+}
+
+will fail as the return has nothing to do with the parameters and their
+lifetimes
+
+this might seem like a drag but it keeps the memory safety principle.
+
+
 
