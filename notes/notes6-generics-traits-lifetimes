@@ -565,5 +565,70 @@ lifetimes
 
 this might seem like a drag but it keeps the memory safety principle.
 
+--- lifetimes in structs
+
+structs may hold references to other things but the lifetime must be specified
+
+struct ImportantExcerpt<'a>{
+    part: &'a str,
+}
+
+fn main() {
+    let novel = String::from("call me ishmael. Some years ago");
+    let first_sentence = novel.split('.').next().expect(
+        "Could not find a '.'");
+    let i = ImportantExcerpt { part: first_sentence };
+}
+
+all this means that the string passed will live the same as the instanciation
+of the struct.
 
 
+--- lifetime elisions
+
+are rules of the compiler that allow us to avoid the need of specifying 
+lifetimes in some cases. 
+
+"input lifetimes" -> on parameters
+
+"output lifetimes" -> on returns
+
+rules:
+
+1. each parameter that is a reference has its own lifetime parameter
+2. if there is only one input lifetime parameter it is assigned to all output
+   parameters
+3. if there are multiple input lifetime parameters but one of them is &self or
+   &mut self then that lifetime is applies to all output lifetimes. 
+
+if some or any of those rules do not apply we must use explicit lifetimes.
+
+in methods of structs is kinda redundant for the third rule, we dont need to 
+explicitly define them as the self parameter hijacks the lifetime of the output
+
+--- static lifetime
+
+static makes that piece of data last for the duration of the program
+
+e.g 
+
+let s: &'static str = "I have a lifetime";
+
+this will last as long as the program runs.
+
+-- all mixed together
+
+use std::fmt::Display;
+
+# has a lifetime 'a and a generic type T that implements Display
+# for the announcement
+fn longest_with_announcement<'a, T>(x: &'a str, y: &'a str, ann: T) -> &'a str
+    where T: Display
+{   
+    println!("{} Announcement", ann);
+    if x.len() > y.len() {
+        x
+    }else{
+        y
+    }
+} 
