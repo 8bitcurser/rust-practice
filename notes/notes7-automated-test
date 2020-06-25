@@ -1,0 +1,83 @@
+---- testing in rust
+
+tests in rust are just functions that have some nice toolsets that allow at
+some degree easy testing.
+
+we can add he #[test] attribute to a function and BOILA a test function.
+
+#[test]
+fn test_fn(){
+    ....
+}
+
+test are usually declared inside a module and have so sibling methods that are
+not necessarily test, but methods that help prepare, setup the test.
+
+to run the tests in a crate do
+
+>> cargo test 
+
+the output goes something like this
+
+
+>> test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out
+
+measured are benchmarking tests
+
+
+Rust also runs some documentation tests on the module
+
+Doc-tests adder
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out
+
+we have none.
+
+---
+
+we may make a test fail by passing the panic!() function
+
+
+--- asserting macros
+
+
+assert! macro evaluates that the value passed is True if its false it calls 
+the panic! macro
+
+some tests have the use super::*; notation inside the module delcaration, this
+brings the code from the inner module (test module) onto the outer module 
+(the whole crate)
+
+we may negate values by preceden the value with a !
+assert!(!false);
+
+will be true
+
+assert!(!true); will panic
+
+-- assert equality assert_eq!
+
+
+-- assert inequality asssert_ne!
+
+
+both take two values and check wheter they are the same or not
+
+assert_eq!(1, 1);
+assert_ne!(1, 2);
+
+on these type of assertions both values are considered
+left and right, and the order they are compared it doesn't matter.
+
+
+values that are compared with this macros must have implemented the
+PartialEq and Debug traits.
+
+
+we can add custom messages to assertions by doing things like these:
+
+
+assert!(!true, "Value was not true");
+
