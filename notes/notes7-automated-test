@@ -81,3 +81,136 @@ we can add custom messages to assertions by doing things like these:
 
 assert!(!true, "Value was not true");
 
+
+-- should panic
+
+this attribute to the test function tells rust that the test must panic in
+order to pass, if it doesn't then it must fail.
+
+
+e.g.
+
+#[test]
+#[should_panic]
+
+fn greater_than_100(){
+    # takes values up to 100
+    Guess:new(200);
+}
+
+this tests tend to be imprecise as the method could panic for many different
+reasons thats why we may add an expected string to the should_panic attr so it
+validates that the exception is the one we are waiting for
+
+#[should_panic(expected = "something something")]
+
+
+-- tests with Result<T, E>
+
+This way we can make test that do not panick but throw an err.
+This type of tests can not hold the should panic attribute
+
+
+--- Test running
+
+tests usually run in parallel but we can tell rust to run them consecutively
+
+to run them consecutively
+
+>> cargo test -- --test-threads=1
+
+(we could also designate more threads)
+
+
+if we want rust to also display the prints on passing tests
+
+
+>> cargo test -- --nocapture
+
+-- run a particular test
+
+we can pass the name of the test/s to cargo test as to run a subset of tests
+instead of the whole bunch
+
+also cargo test supports filtering tests
+
+if we have three tests with the names
+
+add_two_
+
+add_three
+
+substract_one
+
+and we do cargo test add
+
+then it will run the first two
+
+
+-- ignoring tests
+
+adding the attribute
+#[ignore] will ignore the tests with this attribute fromt he run
+
+we may run only the ignored tests by doing
+
+>> cargo test -- --ignored
+
+--- Test organization
+
+unit tests -> small and focused, only one module in isolation or private
+interfaces
+
+integration tests -> external to the library and test the code as someone would
+by using the public interface.
+
+unit tests go at the src folder organized by a file, the convention is to 
+create a module named test in each file that contain the test functions.
+
+the #[cfg(test)] attribute at the test module tells cargo to run and compile
+tests only when >> cargo test is run and not when >> cargo build is run.
+
+
+integration tests do not need the cfg annotation and do not go into the src 
+directory
+
+
+Rust allows us to test private functions.
+
+
+integration tests are located at a test directory that we must create and its
+at the same level of the src directory.
+
+
+To have common assets be used by many different integration tests we must 
+create them as follow 
+
+tests/<name_of_common>/mod.rs
+
+this way cargo doesn't think they are tests to be run
+for example
+
+tests/common.rs
+
+would be considered by rust as a test 
+
+to use the common assets its just the same
+
+<name_of_common>::what_ever()
+
+
+-- binary crates do not hold integration tests as a bin crate does not
+expose functions to be used, only lib crates do that --
+
+a workaround this is adding a lib.rs that holds the important functions to be
+tested, which now rust will recongnize as exposed and will be able to be
+tested.
+
+its usual for us to see a
+
+main.rs that calls code from a lib.rs so we can test the shit out of it.
+
+
+
+
+
