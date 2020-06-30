@@ -4,6 +4,7 @@
 use adder;
 
 #[test]
-fn it_adds_two() {
+fn it_adds_two_the_combeack() {
     assert_eq!(4, adder::add_two(2));
+    println!("YEY");
 }
