@@ -1,9 +1,9 @@
-#[cfg(test)]
 
 pub fn add_two(a: i32) -> i32 {
     a + 2
 }
 
+#[cfg(test)]
 mod tests {
     // Without this line we wouldn't be able to test add_two
     use super::*;
