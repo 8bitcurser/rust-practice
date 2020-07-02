@@ -1,0 +1,37 @@
+use super::*;
+
+#[test]
+#[should_panic(expected="too many arguments")]
+fn test_too_many_args() {
+    let args = vec![
+        "1".to_string(), "2".to_string(),
+        "3".to_string(), "4".to_string()
+    ];
+    if let Err(err) = Config::new(&args) {
+        panic!(err);
+    }
+}
+
+#[test]
+#[should_panic(expected="not enough arguments")]
+fn test_not_enough_args() {
+    let args = vec![];
+    if let Err(err) = Config::new(&args) {
+        panic!(err);
+    }
+}
+
+#[test]
+fn test_proper_params() {
+    let args = vec![
+        "exec".to_string(),
+        "query".to_string(),
+        "path".to_string(),
+    ];
+    let config = Config::new(&args).unwrap_or_else(
+        |err| {panic!()}
+    );
+    assert_eq!(config.query, "query".to_string());
+    assert_eq!(config.filename, "path".to_string());
+}
+

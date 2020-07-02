@@ -34,3 +34,8 @@ impl Config {
         }
     }
 }
+
+
+#[cfg(test)]
+#[path="./unit_tests.rs"]
+mod unit_tests;
