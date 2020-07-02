@@ -11,6 +11,8 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     println!("\nThe file has the following content: \n{}", contents);
     // is idiomatic we want the side effect which is reading the file
     // not a return itself.
+    let results = search(&config.query, &contents);
+    println!("{:#?}", results);
     Ok(())
 }
 
@@ -35,6 +37,17 @@ impl Config {
     }
 }
 
+// this means the resulting vector is "binded" to the lifetime of the contents
+// string passed, this resulting vector will have slices of the contents string
+pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
+    let mut results = Vec::new();
+    for line in contents.lines() {
+        if line.contains(query) {
+            results.push(line);
+        }
+    }
+    results
+}
 
 #[cfg(test)]
 #[path="./unit_tests.rs"]
