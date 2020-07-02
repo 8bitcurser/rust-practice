@@ -1,37 +1,13 @@
-## Welcome to GitHub Pages
+## Purpose
 
-You can use the [editor on GitHub](https://github.com/tomowl/rust-practice/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
+I started this repository so I could track my journey through Rust, from merely knowing about it to being able to complete
+the projects described at "The book". As a software engineer I am constantly concern with performance and whats coming next,
+as soon as I heard about some results people were obtaining with Rust, I knew I had to at least take a glance.
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+Also at the time I started this repo I was working on my degrees thesis which required working with WASM, which Rust is great with.
 
-### Markdown
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+## Take a glance!
 
-```markdown
-Syntax highlighted code block
-
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/tomowl/rust-practice/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+Please feel free to read my notes as I went through the book, I tried to make them as understandable as I could and funny enough so
+I wouldn't fall asleep while reading them.
