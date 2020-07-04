@@ -1,0 +1,153 @@
+Rust borrows many things from functional
+
+Closures <- f(x) construct-ish  that can be stored in a variable
+Iterators <- how we process a series of elements
+enums, pattern matching.
+
+the why is clear, the performance. This two feature are extremely fast and give
+rust steroids.
+
+
+--- Closures
+
+anonymous f(x) that can be stored in a variable or can be passed as args to
+other f(x).
+
+we can create a clousure at an X scope and evaluate it to a Y scope
+
+clousures can capture values from the scope in which they are defined, which
+f(x) cant do
+
+all this increases the felixibility and power of using functions.
+
+e.g.
+
+// num is the parameter
+let expensive_closure = |num| {
+    println!("Calculating slowwwwly...");
+    thread::sleep(Duration::from_secs(2));
+    num
+};
+
+// puting all between curly braces is optional if less than one line is needed
+for the clousure
+
+this means expensive_closure holds the definition of an anonoymous function not
+the result value from it.
+
+calling a closure is the same as a function.
+
+-- clousures type inference and annotations
+
+fn needs the return type and parameters type because they are part of an
+explicit interface exposed to the users, so we all have to agree on what a
+function takes and what it returns, with clousures this are hidden, stored
+in variables, without naming or exposure. 
+
+Usually short and relevant for a narrow context, at this small context the 
+compiler can infer what type it will receive and return. we could annotate 
+the types if we want to increase the explicitness and readability but its 
+up to one.
+
+|num: u32| -> u32 {...}
+
+if we call the clousure twice one with a string and then with an int we gonna
+get an error as the compiler for the first call infered the clousue takes
+strings not ints.
+
+--- store clousures using gen parameters and the Fn traits
+
+a GREAT pattern to store data at the cache is called
+
+"memoization or lazy evaluation"
+
+the clousure is stored at a struct as well as the resulting value of calling
+the clousure, this way we exe the clousure only upon needing the resulting 
+value, sending the return value to the cache. 
+-pretty amazing-
+
+but to do so we need to specify the type of the clouse cause structs defs
+must have their types specified on each field, thats why generic types come
+to play.
+
+this way two clousures even if with the same signature they will be considered
+different. Clousures can be added to enums or functions paramenters but to 
+do so we need generics and trait bounds, specificially the Fn one.
+
+< The Fn trait comes from the std lib and all clousures implement this one or
+FnMut and FnOnce>
+
+struct Cacher<T>
+    where T: Fn(u32) -> u32
+{
+    calculation: T,
+    value: Option<u32>
+}
+
+note that we need to specify the type to Fn of the parameter passed and the
+return.
+
+any clousure we want to store at the cacher must take one argument that is a 
+u32 and must return one u32 value
+
+
+<f(x) can implement all three of the Fn traits, if the thing we want to do
+doesn't require capturing a value from the env maybe we are better of with a
+fn rather than a closure>
+
+before executing the clousure value will be none. when the code asks for the
+result it will execute the clousure and store the result within a "Some" variant
+at the value field, but if we call the value again instead of re running it
+will provide the value stored.
+
+to do all this wizardy we need to write it.
+
+impl<T> Cacher<T>
+    where T: Fn(u32) -> u32 {
+    fn new(calculation: T) -> Cacher<T> {
+        Cacher {
+            calculation,
+            value: None
+        }
+    }
+
+    fn value(&mut self, arg: u32) -> u32 {
+        match self.value {
+            Some(v) => v,
+            None => {
+                let v = (self.calculation)(arg);
+                self.value = Some(v);
+                v
+            }
+        }
+    }
+}
+
+
+we dont want this fields to change thats why we make them private and manage
+them internally.
+
+
+so the cool thing here is when we pass the clousue that meets our requirements
+we store it with the new method and set value to none, then when we need the
+value, we first check if we already have it set if we do we return, if not we
+call the clousure and set the value.
+
+and this would be called like this
+
+let mut expensive_result = Cacher::new(|num| {
+    println!("calculating slowly...");
+    thread::sleep(Duration::from_secs(2));
+    num
+});
+
+// as is the first it will call the clousue and store the value
+expensive_result.value(intensity);
+// here it will just return it.
+expensive_result.value(intensity);
+
+
+the problem with this implementation is that cacher assumes args is always the
+same
+
+
