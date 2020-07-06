@@ -150,4 +150,133 @@ expensive_result.value(intensity);
 the problem with this implementation is that cacher assumes args is always the
 same
 
+-- clousures know their env
+
+
+fn main() {
+    let x = 4;
+    // this clousure has the Fn trait
+    // if we write it like
+    // let equal_to_x = move |z| z == x;
+    // it changes to FnOnce as it takes the argument
+    // useful when moving a clousure to another thread and the  data with it.
+    let equal_to_x = |z| z == x;
+    ley y = 4
+    assert!(equal_to_x(y));
+}
+
+
+here the clousure knows x even if it was not passed as an argument, this could
+not have been done with functions which know only what its passed and their own
+scope.
+
+although this produces an overhead, as the clousure is using memory to store
+the values referenced.
+
+clousures may make themselves with those variables in three ways, which are
+associated with the Fn family traits.
+
+
+take ownership => FnOnce, takes ownership of the variable bringing it into its
+own scope, the once stands for it being able to do it only once.
+borrowing mutably => FnMut, allows a change of env
+
+
+By default all clousures implement the FnOnce
+borrowing immutably => Fn, doenst allow cahnge of env
+
+
+--- Iterators
+
+iterators are lazy they do not nothing until called
+
+iterators remove the hassle of having to use logic to iterate, they are an 
+abstraction. iterators implement the Iterator trait.
+
+the iterator must be held in a mutable variable mainly because the next method
+changes the internal state the iterator uses to know where it stands. The next
+method "consumes" the iterator, next returns an immutable reference to the 
+item inside the iterator, we could change this replacing the .iter() call to
+into_iter(), if we want to iter over mutable references we could do
+iter_mut()  
+
+the iterator trait comes with several different methods and those that reffer
+to the next method are called consuming adaptors
+
+e.g 
+
+let v = vec![1, 2, 3];
+let v_iter = v.iter();
+let su: i32 = v_iter.sum();
+
+assert_eq!(su, 6);
+
+methods at the iterators trait that turn one iterator into another are called
+iterator adaptors, but as they are all lazy you will need to use a consumer
+to be able to use its values.
+
+
+e.g 
+
+let v1: Vec<i32> = vec![1, 2, 3];
+v1.iter().map(|x| x+1);
+
+this will produce nothing as iterators are lazy but if we add the collect method
+that is a consumer method which gathers the values into a collection data type
+
+
+let v2: Vec<i32> = v1.iter().map(...).collect();
+assert_eq!(v2, vec![2, 3, 4]);
+
+
+-- iterators + clousures that capture the env
+
+this example uses filter, filter takes a clousure and evaluates each item in 
+the iterator if the item returns true by the clousue then its considerated for
+the iterator produced by filter.
+
+#[derive(PartialEq, Debug)]
+struct Shoe {
+    size: u32,
+    style: String
+}
+
+fn shoes_in_my_size(shoes: Vec<Shoe>, shoe_size: u32) -> Vec<Shoe> {
+    shoes.into_iter()
+        .filter(|s| s.size == shoe_size).collect()
+}
+
+< iterators can be made out of anything as long as they implement the 
+Iterator trait>
+
+e.g.
+
+struct Counter {
+    count: u32
+}
+
+impl Counter {
+    fn new() -> Counter {
+        Counter {count: 0}
+    }
+}
+
+impl Iterator for Counter {
+    // we set the associated Item type which will return u32 values.
+    type Item = u32;
+    fn next(&mut self) -> Option<Self::Item> {
+        self.count += 1;
+        if self.count < 6 {
+            Some(self.count)
+        } else {
+            None
+        }
+    }
+}
+
+counter = Counter::new();
+
+counter.next() -> will return a Some(x) where x is less than 6 1..2..3 ...
+when it reaches 6 it will return the None type.
+
 
