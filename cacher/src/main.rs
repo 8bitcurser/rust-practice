@@ -3,26 +3,29 @@ use std::collections::HashMap;
 use std::time::Duration;
 
 
-struct Cacher<T>
-    where T: Fn(u32) -> u32
+struct Cacher<T, A>
+    where A: std::cmp::Eq + std::hash::Hash + Copy,
+          T: Fn(A) -> A,
+          
 {
     calculation: T,
-    values: HashMap<u32, u32>
+    values: HashMap<A, A>
 
 }
 
 
-impl<T> Cacher<T>
-    where T: Fn(u32) -> u32
+impl<T, A> Cacher<T, A>
+    where A: std::cmp::Eq + std::hash::Hash + Copy,
+          T: Fn(A) -> A
 {
-    fn new(calculation: T) -> Cacher<T> {
+    fn new(calculation: T) -> Cacher<T, A> {
         Cacher {
             calculation,
             values: HashMap::new(),
         }
     }
 
-    fn value(&mut self, arg: u32) -> u32 {
+    fn value(&mut self, arg: A) -> A {
         let value = self.values.get(&arg);
         let v = match value {
             Some(v) => v,
