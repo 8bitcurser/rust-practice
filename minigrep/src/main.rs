@@ -10,9 +10,8 @@ use minigrep::Config;
 /// setting up any config, calling the run function, handling errors coming
 /// from the run call and call the CLI parsing logic with the argument values.
 fn main() {
-    let args: Vec<String> = env::args().collect();
     // if we get an error we call the clousure
-    let config = Config::new(&args).unwrap_or_else(|err| {
+    let config = Config::new(env::args()).unwrap_or_else(|err| {
         eprintln!("Problem parsing the arguments: {}", err);
         // exit code 1 = FAIL
         process::exit(1);

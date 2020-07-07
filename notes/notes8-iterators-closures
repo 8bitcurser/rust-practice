@@ -279,4 +279,34 @@ counter = Counter::new();
 counter.next() -> will return a Some(x) where x is less than 6 1..2..3 ...
 when it reaches 6 it will return the None type.
 
+we can mix iterators results together
 
+//skip 1 will avoid the number 1
+fn using_other_iterator_trait_methods() {
+    let sum: u32 = Counter::new().zip(Counter::new().skip(1))
+        .map(|(a, b)| a * b).filter(|x| x % 3 == 0).sum();
+}
+
+so this zips two counters generating an iterator of tuples that have one elment
+of each iterator, then mutiply the values in the tuple and filter those results
+only those that divided by 3 produce no excess are then summed
+
+1,2 = 2 not dividable
+2,3 = 6
+3,4 = 12
+4,5 = 20 not dividable
+what about 
+5, None well rust knows that if zip produces a tuple where one of them is None
+it should ignore it.
+
+6 + 12 = 18 yey
+
+-- Performance Iterator vs Loop
+
+iterators are slightly more performant than loops, which is great! this is 
+because iterators are part of Rust's zero-cost abstractions, which means it 
+doesn't add overhead.
+
+iterators with rust use unrolling which is an optimization for assembly code
+instead of adding the overhead of the loop control it genreates repetitive code
+for each iteration

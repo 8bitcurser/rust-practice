@@ -26,31 +26,30 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn new(args: &[String]) -> Result<Config, &'static str> {
+    pub fn new(mut args: std::env::Args) -> Result<Config, &'static str> {
     // using clone is not optimal yet it provides clarity and the trade off
     // for this scenario is worth to change.
-        if args.len() < 3 {
-            return Err("not enough arguments");
-        } else if args.len() > 3 {
-            return Err("too many arguments");
-        } else {
-            let query = args[1].clone();
-            let filename = args[2].clone();
-            let case_sensitive = env::var("CASE_INSENSITIVE").is_err();
-            Ok(Config {query, filename, case_sensitive})
-        }
+    // skip first poitnless arg
+        args.next();
+        let query = match args.next() {
+            Some(arg) => arg,
+            None => return Err("Didn't get any query string"),
+        };
+        let filename = match args.next() {
+            Some(arg) => arg,
+            None => return Err("Didn't get any filename string"),
+        };
+
+        let case_sensitive = env::var("CASE_INSENSITIVE").is_err();
+
+        Ok(Config {query, filename, case_sensitive})
     }
 }
 
 // this means the resulting vector is "binded" to the lifetime of the contents
 // string passed, this resulting vector will have slices of the contents string
 pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
-    let mut results = Vec::new();
-    for line in contents.lines() {
-        if line.contains(query) {
-            results.push(line);
-        }
-    }
+    let results = contents.lines().filter(|x| x.contains(query)).collect();
     results
 }
 
