@@ -1,0 +1,89 @@
+--- cargo profiles
+
+building the code may have different profiles for different purposes
+by default we have
+
+>> cargo build [<- dev profile]
+>> cargo build --release [<- release profile]
+
+
+but we can have different ones, both of them differ on the opt-level which is
+the amount of optimizations the code goes through, this value oscilates
+between 0 and 3. More optimization = slower build.
+
+a full list is here https://doc.rust-lang.org/cargo <- of differnet features.
+
+
+--- publishing crates
+
+to publish you gotta make good docs, /// <- documentaiton comments support
+markdown.
+
+when we run cargo doc, this will run rustdoc tool and put the generated HTML
+at the target/doc dir
+
+cargo doc --open <-- wil create and open the doc in a browser.
+
+common sections for docs.
+panics <- when the code could panic
+errors <- descriptions of the errors
+safely <- if the function is unsafe to be called.
+
+
+cargo tests also capture this comments especifically the examples and runs
+them and verify this examples run properly.
+this are under the examples section and capture with the ``` <- mark
+
+# Examples
+
+```
+... examples
+```
+
+//! comments are intended to exlain the purpose of the code rather than givin
+use examples they support markdown as well, they are usually placed at the 
+lib.rs
+
+
+-- the structure of the API
+
+we dont need to re organize everything even if we have a type in a deep down
+tree of files and folders we can re export it so its easy for the user using
+our api to get access to it
+
+Re exporting means we will use the pub use keywords
+
+Re exporting will make the public structure different from the private one.
+
+Re exporting takes a public item in one location and makes it public in another
+location as if it were defined in the new location instead.
+
+
+suppose we have on our lib two mods, A and B
+inside A we define 1 and 2 and in B we define 3
+
+someone using our code will have to do 
+
+use mod::A::1;
+use mod::B:3;
+
+this means they gotta know the two modules and then the elements, which they 
+may not if they dont go through the docs first.
+
+what we can do at our lib.rs
+
+is do (at the top)
+
+pub use self::A::1;
+pub use self::A::2;
+pub use self::B::3;
+
+
+cargo doc will capture this at the re-exports section and our user may do
+
+use mod::1;
+use mod::3;
+
+easssier.
+
+
