@@ -1,0 +1,7 @@
+[workspace]
+
+members = [
+    "biner",
+    "liby1",
+    "liby2"
+]

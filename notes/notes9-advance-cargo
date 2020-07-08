@@ -86,4 +86,111 @@ use mod::3;
 
 easssier.
 
+-- metadata to the crate
 
+the package name can be set at the Cargo.toml file under the [package]
+section
+
+name = "test1234"
+
+but also we gotta define a description and a license, the license needs an 
+identifier like MIT, one can check them out at spdx.org/licenses
+
+we can add many licences, by using the OR keyword
+
+license = "MIT OR Apache-2.0"
+
+e.g.
+
+[package]
+name = "test"
+version = "0.1.0"
+authors = ["joe doe <joe@doe.me"]
+description = "blah blah blah"
+license = "MIT OR Apache-2.0"
+edition = "2020"
+
+we may publish the crate by doing cargo publish, the publish is permanent and
+the code uploaded can never be deleated
+
+although we can not remove a version we can "yank" it meaning we dont make it
+usable for new projects but keeps it for those that already use it.
+
+>> cargo yank --vers 1.0.1
+
+if we do cargo yank --vers 1.0.1 --undo 1.0.1 we can undo de yank.
+
+
+-- cargo workspace
+
+allows us to split a package into multiple library crates, workspaces lets the
+developer manage multiple related packages, all this packages will share the
+same Cargo.lock 
+
+there are multiple ways to define a workspace project ref to the workspace
+folder
+
+the important thing here is we need a main folder which is the workspace
+place a Cargo.toml with the section [workspace] and inside that section
+the members which is a list of all the other sub projects, this projects have
+to be generated one by one
+
+and using cargo respectively
+if we had
+
+members = [
+ "1"
+]
+
+inside the workspace we gotta do cargo cargo new "1" for this binary crate but
+lets imagine 1 uses 2 and 3 which are libraries then we have to do
+
+members = [
+ "1",
+ "2"
+]
+
+cargo new "2" --lib
+
+and then the same for three
+remember now that that 1 dependen on 2 and 3, so on its own cargo.toml we gotta
+define the depnedencies as
+
+[dependencies]
+2 = {path = "../2"}
+
+
+the workspace is all build together, so at the top of the workspace
+we do 
+ cargo build
+
+if we want to run the binary crate we must do
+
+cargo run -p 1
+
+
+each crate inside the workspace must define its own dependencies, even
+if two crates use the same one! Rust will work this out and place the same with
+no repetition at the top level Cargo.lock
+
+cargo tests at the top level will run the tests of all child crates.
+but we can be specific by doing
+
+cargo tets -p 1 for example which will run only the tests of crate 1
+
+publishing a workspace is done by publishing each crate separately we can not
+do it all at once.
+
+
+-- cargo install
+
+cargo install
+
+allows developers to install BINARY crates other developesr have created
+locally
+
+cargo is customizable and allows users to run their own commands if we have 
+a cargo-something bin installed at the path, cargo lets us run it as
+> cargo something
+
+cargo --list displays all custom commands.

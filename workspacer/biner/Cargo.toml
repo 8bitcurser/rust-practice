@@ -1,0 +1,12 @@
+[package]
+name = "biner"
+version = "0.1.0"
+authors = ["Tom G. <tomowl@pm.me>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+
+liby1 = {path = "../liby1"}
+rand = "0.3.14"
