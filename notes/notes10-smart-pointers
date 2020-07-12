@@ -1,0 +1,128 @@
+--- Smart Pointers
+
+
+smart pointers are similar to pointers but have extra capabilities.
+
+eg. Reference counting 
+
+reference counting allows many members to be owners of a piece of data, when
+all the owners have stoped using the data it is cleaned up.
+
+reference ≠ smart pointers
+
+references are pointers that borrow data
+smart pointers own the data they point to.
+
+smart pointers are usually implmented as structs that implement the 
+Deref and Drop tratis.
+
+The deref trait allows an instance of the smart pointer struct to behave like
+a ref.
+
+the drop trait allows one to specify the behavior of the struct when it goes
+out of scope.
+
+some SP (smart pointers) examples
+
+Box<T> -> allocates values on the heap
+Rc<T> -> a reference counting that allows multiple ownership
+Ref<T> RefMut<T> both accessed through RefCell<T> a type that enforces
+borrowing rules at runtime instead of compile time.
+
+other examples: Vec<T> and String
+
+
+-- Box<T>
+
+easy way to store stuff at the heap rathr than the stack, this is achieved
+by sending the reference to the box into the stack while keeping the data at
+the heap.
+
+Boxes do not have performance overhead, besides the storing of data
+
+common usages:
+
+1. when you have a type which size can not be known at compile time and u need
+   to use a value of that type in a ctx where the exact size is required.
+
+2. when large data is handled and the ownership must be transferred but we
+    don't want to copy it.
+
+3. When you want to own a value and you care only if the type implements a 
+   trait rather than the type itself.
+
+
+Box<T> to store data on the heap
+
+fn main() {
+    let b = Box::new(5);
+    println!("b = {}", b);
+}
+
+the deallocation of the resources is similar as it would happen if the value
+would have been on the stack in the first place, when b goes out of scope
+the stack references is deallocated as the data stored in the stack.
+
+
+
+Enabling recursive types -> allows to define types at places we wouldn't be
+able.
+
+rust needs to know the exact amount of space a type would take up. But
+recursive types, this scenario happens when a value can have as part of itself
+a value of the same type, this could go inifinitely and rust would panic. 
+
+To this situation we can insert a box because boxes have a known size and in 
+this way we have a recursive type
+
+
+eg.
+
+enum List {
+    // cons constructs a new pair from its two args
+    // commonly a single value and another pair
+    // i32, List
+    Cons(i32, List),
+    Nil
+}
+
+its like creating a list where the first value is the number and the following
+is a structure that holds the next value, and the last one will be Nil meaning
+that there are no more items, a way to create a collection is to recursively
+call Cons
+
+
+use crate::List::{Cons, Nil};
+
+fn main(){
+    let list = Cons(1, Cons(2, Cons(3, Nil))):
+}
+
+this will not explode as rust does not know what this cons type syze is
+and will tell that List has infinite size!
+
+so to fix this we need to tell the compiler that List will hold this Cons
+that has an i32 and a reference to another List, this is where Box comes to
+play as it is a reference.
+
+enum List {
+    Cons(i32, Box<List>),
+    Nil
+}
+
+use crate::List::{Cons, Nil};
+
+fn main() {
+    let list = Cons (1,
+        Box::new(Cons(2,
+            Box::new(Cons(3,
+                Box::new(Nil))))));
+}
+
+Great this compiles as now the Cons now holds a value and a reference to an 
+instance of the enum which is cool as rust knows the size of refence.
+
+-- Deref trait
+
+allows us to make smart pointers be treated as normal references, writing code
+that works with references and uses it with SP too.
