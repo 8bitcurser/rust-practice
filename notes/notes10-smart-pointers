@@ -126,3 +126,168 @@ instance of the enum which is cool as rust knows the size of refence.
 
 allows us to make smart pointers be treated as normal references, writing code
 that works with references and uses it with SP too.
+
+
+common usage of deferencing
+
+fn main() {
+
+let a = 5;
+let b = &a;
+
+assert_eq!(5, a);
+// notice we have to deference the variable to have access to the value
+assert_eq!(5, *b);
+
+}
+
+we could use box as well here
+
+let a = 5;
+let b = Box::new(a);
+
+assert_eq!(5, a);
+// even if its a box reference it allows deferencing so we can evaluate the
+// value
+assert_eq!(5, *b);
+
+smart pointers behave differently to normal pointers 
+
+struct MyBox<T>(T);
+
+impl <T> MyBox<T> {
+    fn new(x: T) -> MyBox<T> {
+        MyBox(x)
+    }
+}
+
+
+even if we replace the previous Box with ours the code wont compile as we
+havent implemented the Deref trait therefor it wont be able to deference the 
+value.
+
+
+so
+
+use std::ops::Deref;
+
+impl<T> Deref for MyBox<T> {
+    // defines an associated type for the deref trait
+    type Target = T;
+    // returns a ref to the value, if it would return the plain value then it 
+    // the ownership of the value would be removed from self. We dont want
+    // to take the value out of the Box, we just wanna know whats inside.
+    fn deref(&self) -> &T {
+        &self.0
+    }
+}
+
+
+here we are implmenting the trait which requires us to implement the deref 
+method.
+
+without the deref trait we would only be able to deference only & references.
+The deref trait gives the compiler the capability to take a value of any type
+that implements the defer trait and call its deref method to get the & reference
+that knows how to dereference
+
+Deref Coercions -> this is performed by rust when arguments are passed to f(x)
+and methods. this converts a ref to a type that implements the Deref trait
+into a ref to a type that Deref can convert the original type into.
+
+ref -> type with Deref -> ref -> type that Deref can convert the original type 
+
+for example
+
+fn hello(name: &str) {
+    // the standard lib has a inmpl of Deref on String that returns
+    // the stirng slice, here it calls the deref again to turn the 
+    // &string into a &str which amtches the hello function call
+    println!("Hello, {}!", name);
+}
+
+fn main() {
+    // m is a reference to a string stored at the heap
+    let m = MyBox::new(String::from("Rust"));
+    // we pass a &MyBox<String> to the function
+    hello(&m)
+    // rust turns it into a &String by calling the deref method
+    
+}   
+
+if deref wasnt implemented we would have had to do this
+
+// this would deference the stirng at the box due to the *
+// we have the String now we obtain a slice of it so we can use it
+// then we pass a reference of the slice ot the function
+hello(&(*m)[..]);
+
+deref coercion simplifis all of this for us by calling the deref methods 
+when needed rust understands that we want to pass the reference to the value
+inside the box, but it knows this thanks to the deref trait and method 
+implementaitons. rust will call the deref method as many times as needed in
+order to get a reference that matches the parameter type, this is of course
+resolved at compile time
+
+overriding the * behavior may be used for mutable references as well, so far
+we did this with immutable references, this can be done by implementing the 
+DerefMut trait to override the * operator.
+
+
+
+- cases where deref coercion is used by rust
+
+1. from &T to &U when T: Deref<Target=U> (case of box and string)
+2. from &mut T to &mut U when T: DerefMut<Target=U> (similar but mutable)
+3. From &mut T to &U when T: Deref<Target=U> (mutable can be coerced into 
+immutable but not the other way around, breaks borrowing rules)
+
+-- Drop trait
+
+This allows us to change the behaviour when a SP is going out of scope
+Box implements Drop to deallocate the space on the heap that the box points to
+
+Drop is usually done automaticall when a SP goes out of scope, some languages
+dont do this and may cause a memory leak that will crash and burn the code.
+
+Drop traits needs the implementation of the drop method, which takes a mut ref
+to self
+
+e.g.
+
+struct CustomSP {
+    data: String
+}
+
+impl Drop for CustomSP {
+    fn drop(&mut self) {
+        println!("Dropping CustomSP with data {}", self.data);
+    }
+}
+
+fn main () {
+    let c  = CustomSP {data: String::from("my SP"));
+    let d = CustomSP {data: String:from("Another SP"));
+    println!("Custom SPs created");
+}
+
+
+dropping early (before going out of scope) might be done with the drop
+function from 
+
+>> std::mem::drop
+
+we cannot call the drop method from the CustomSP as rust will complain that
+destructors calls are not explicitly allowed, this is because when the 
+CustomSP actually goes out of scope Rust would be freeing mem that was already
+freed (double free error)
+
+if we had something like
+
+use std::mem::drop;
+
+-- Rc<T> Reference Counted Smart Pointer
+
+let c = CustomSP { data: String::from("Rust")};
+drop(c);
+
