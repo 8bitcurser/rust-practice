@@ -286,8 +286,116 @@ if we had something like
 
 use std::mem::drop;
 
--- Rc<T> Reference Counted Smart Pointer
-
 let c = CustomSP { data: String::from("Rust")};
 drop(c);
+
+
+-- Rc<T> Reference Counted Smart Pointer
+
+Enables multiple ownership, a case is in a graph that a node gets pointed by
+many different nodes, all of them "own" the target node and until it gets
+orphaned and no children come from it is that we can delete it.
+
+Rc<T> keeps track of the number of references to a value which determines
+if the value is still in use
+
+
+Rc<T> is only used for single threaded scenarios
+
+
+e.g
+
+// notice now instead of a Box<list> we now take an Rc
+enum List {
+    Cons(i32, Rc<List>),
+    Nil
+}
+
+
+use crate::List::{Cons, Nil};
+use std::rc::Rc;
+
+fn main() {
+    let a = Rc::new(Cons(5, Rc::new(Cons(10, Rc::new(Nil)))));
+    // Each time we call the clone method we increment the reference counter
+    // of elements pointing to a.
+    let b = Cons(3, Rc::clone(&a));
+    let c = Cons(4, Rc::clone(&a));
+}
+
+
+//c 4-
+//     \
+//a     -5-10-Nil
+//     /
+//b 3 -
+
+
+a will be cleaned only when there are no more things pointing to it.
+
+using Rc simplifies the idea of having to introduce lifetimes to decalre how 
+much time the references would live and even so it might not be possible given
+that the Nil ref might die before any of the other.
+
+Rc::clone does not do a deep copy of the data it just increments the reference
+counter, but we could have done a.clone instead, but think of all the overhead!
+
+
+< a deep copy takes a lot of time which may cause performance issues >
+
+e.g adding prints to main as too see how much the counter is modified
+
+
+fn main() {
+    let a = Rc::new(Cons(5, Rc::new(Cons(10, Rc::new(Nil)))));
+    println!("Counter after creating a = {}", Rc::strong_count(&a));
+    let b = Cons(3, Rc::clone(&a));
+    println!("Counter after creating b = {}", Rc::strong_count(&a));
+    {   // generate a sub scope
+        let c = Cons(4, Rc::clone(&a));
+        println!("Counter after creating c = {}", Rc::strong_counter(&a));
+    }
+    println!("Counter after c goes out of scope = {}", Rc::strong_counter(&a));
+}
+
+we woudld get
+1,
+2,
+3,
+2
+The drop trait works its magic here by doing the decrease automatically
+
+This works great for immutable references
+
+-- RefCell<T> + Rc<T> and the interior mutability pattern
+
+this pattern allows us to mutate data even if there are immutable references 
+to it. This violates borrowing rules and uses 'unsafe' code to bypass this.
+
+We can use types that use the pattern when we can ensure that the borrowing
+rules will be followed at runtime! The unsafe code involved is wrapped in a
+safe API and keeps the outer tpye immutable.
+
+
+
+RefCell<T> represents single ownership over the data it holds
+the differnece with Box is that RefCell enforces the borrowing rules during
+runtime and not compile time as it would happen with box, we would use this
+because the compiler sometimes is way too strict and the memory safe checks it
+applies might be too restrictive for what we need to do and it might reject a 
+correct program.
+
+RefCell<T> is perfect for when you know the borrowing rules are beign followed
+but the compiler cant be sure.
+
+
+also used only in single thread scenarios
+
+. Rc<T> multiple owners for the same data while box and refcell allow only one
+. Box<T> allows immut or mut borrows checked at compile time, Rc allows only
+  immut borrows and refcell allows immutable or mut but checks at runtime
+. RefCell<T> allows multiple mut borrows at runtime, then one can mutate the
+  data even if RefCell is immutable.
+
+
 
