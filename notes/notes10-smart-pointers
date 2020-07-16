@@ -397,5 +397,19 @@ also used only in single thread scenarios
 . RefCell<T> allows multiple mut borrows at runtime, then one can mutate the
   data even if RefCell is immutable.
 
+RefCell has two interesitng methods
+borrow which returns a Ref<T> and borrow_mut which returns a RefMut<T>
+Ref cell keeps track of how many refs are active, if we use borrow
+ref goes up 1 if we use borrow_mut ref mut goes up one on the track
+but we can have as many ref as we want but only 1 ref mut at a time, 
+this rules will be respected at runtime and if we dont the program
+will panic.
+
+keeping track of borrows at runtime has a small runtime performance
+penalty.
+
+
+-- Multiple owners Rc<T> + RefCell<T>
+
 
 
