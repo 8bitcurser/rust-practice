@@ -3,3 +3,23 @@
 we can achieve memory leaks if we generate cycles that consume the stack and 
 may keep leeching memory from the system. This can be done by follwing the code
 at stack-killer
+
+
+-- Weak<T> 
+
+the stack killer could have been prevented using weak references
+by doing Rc::downgrade instead of obtaining a strong reference that increments
+the stroung count by 1 and wont delete the data as long as that count is not 0
+
+downgrade produces a weak references that incrementes the weak_count by 1, but
+this count does not stop the data of being cleaned.
+
+While Rc references represent ownership, weak references do not, if the strong
+reference is 0 it will whipe the data even if the weak reference is 1.
+
+when we get a weak reference we need to check its existance before we do
+anything so we do an upgrade on the reference which will return an
+Option<Rc<T>> Some will be obtained if the value inside the Rc has not been
+dropped.
+
+check the project Tree
