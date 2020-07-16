@@ -411,5 +411,9 @@ penalty.
 
 -- Multiple owners Rc<T> + RefCell<T>
 
+Rc<T> gives multiple uses access to immutable data
+RefCell<T> allows you to mutate immutable data.
+
+mix and you can have many owners that can mutate the data.
 
 
