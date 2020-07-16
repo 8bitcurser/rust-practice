@@ -1,0 +1,5 @@
+--- Memory leaks
+
+we can achieve memory leaks if we generate cycles that consume the stack and 
+may keep leeching memory from the system. This can be done by follwing the code
+at stack-killer
