@@ -2,6 +2,7 @@ use std::sync::Mutex;
 
 fn main() {
     // we declare a mutex with the value 5
+    // Mutex provides interior mutability
     let m = Mutex::new(5);
     // generate a scope
     {
