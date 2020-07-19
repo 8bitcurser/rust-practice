@@ -102,3 +102,5 @@ information regarding who is using what) after using the data you must "Unlock"
 rust api for mutex Mutex<T>
 
 check mutex project and mutex-thread to see a version of Rc safe for threading
+
+-- sync adn send traits
