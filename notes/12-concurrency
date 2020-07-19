@@ -103,4 +103,25 @@ rust api for mutex Mutex<T>
 
 check mutex project and mutex-thread to see a version of Rc safe for threading
 
--- sync adn send traits
+-- sync and send traits
+
+std::marker
+
+
+- Send
+
+allows transference of ownership, a type that implements Send means it can be
+transfered to another thread. (Rc doesnt implement Send, because the threads
+might updated the reference count at the same time!)
+
+
+- Sync
+
+allows a type to be referenced by multiple threads. RefCell is not sync but 
+Mutex is!
+
+If something is Send is also Sync
+
+
+if one implements either trait manually it will imply using unsafe code, we 
+dont need to implement them manually either.
