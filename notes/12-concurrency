@@ -1,0 +1,89 @@
+--- Concurrency
+
+This and parallel programming are both strong foundations of rust as a language
+
+ownership and type systems managed to translate concurrency issues into 
+compile time erros, this avoids the hassle of finding out how to reproduce 
+the issue.
+
+-- threads
+
+runtime -> code included by the lang in every bin
+
+rust handles threading in a 1:1 model meaning one OS thread per one lang thread.
+
+but there are crates that allow a M:N model meaning 
+M green threads per N OS threads -> Green threads (lang provided threads)
+
+threads uses the 
+
+use::std::thread; library and the span method is used to trigger which piece
+of code must run in a separate thread.
+
+
+There are no guarantees regarding the order in which the threads run, if a 
+main thread has a child thread and this main thread finishes it kills the
+child threads as well avoiding a wild thread running forever.
+
+the method spawn returns a JoinHandle if we call its join() method the code
+will wait (wherever we put it) for the child thread to finish, where we put the
+join is important (check thread_counter_joins_handle)
+
+- move data between threads
+
+data from the main thread must be "moved" to the child threads in order to be
+used
+
+use std::thread;
+
+// this wont compile as the child thread has no access to the vector.
+fn main() {
+    let v = vec![1, 2, 3];
+    let handle = thread::spawn(|| {
+        println!("Heres a vector: {:?}", v);
+    });
+    drop(v);
+    handle.join().unwrap();
+}
+
+
+
+
+fn main() {
+    let v = vec![1, 2, 3];
+    // with the move we move the v from the main thread to the child thread
+    let handle = thread::spawn(move || {
+        println!("Here's a vector: {:?}", v);
+    });
+    handle.join().unwrap();
+    // dropping wont work as v passed from the main thread to the child thread
+    drop(v);
+}
+
+- message passing
+
+rust has something called the channel, which is a programming concept from the
+std lib
+
+channel has two parts transmiter(upstream) and receiver(downstream)
+the channel is closed if either part is dropped.
+
+mpsc[multiple producer, single producer]
+mpsc channels can only 1 receivers but X transmitter, channel generation 
+produces a tuple with a transmitter and receiver
+
+the transmitter has a primitive: send which can be used to send a message
+to a receiver, the receiver uses the recv or try_recv primitives to obtain
+the value, recv blocks the main thread execution till it obtains the value.
+try_recv is not blocking, Ok if it got a message, Err if nothing was obtained
+try_recv is useful if the thread must do something else besides sending a
+message.
+
+
+(check message passing project)
+
+
+
+all the methos return a Result<T, E>
+
+
