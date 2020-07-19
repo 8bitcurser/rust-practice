@@ -80,10 +80,25 @@ try_recv is useful if the thread must do something else besides sending a
 message.
 
 
-(check message passing project)
+(check message passing projects)
 
 
 
 all the methos return a Result<T, E>
 
 
+- shared state concurrency
+
+when we pass a message we have one owner of the data, with shared state conc
+we have many owners (kinda) many threads can access the same memory location
+at the same time, this requires other strategies such as mutex.
+
+mutex[mutual exclusion], allows on thread to access a piece of data a time
+meaning two threads can not access the same resource at the same time.
+a thread first pushes a signal so it can let the mutex know it needs the data
+and needs to use the "lock" on it (the lock is a data structure that holds 
+information regarding who is using what) after using the data you must "Unlock"
+
+rust api for mutex Mutex<T>
+
+check mutex project and mutex-thread to see a version of Rc safe for threading
