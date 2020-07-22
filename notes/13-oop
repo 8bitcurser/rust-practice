@@ -1,0 +1,31 @@
+Rust shares many similar concepts with an OOP language and in some sort of way
+under certain definitions we could say it is kinda OOP. Although these
+similarities exist at things like encapsulation and inheritance (using traits)
+we do not get the actual same things for example polymorphism which is code
+that works with different types in rust is obtained with generics at the
+parameters its like common polymorphism but no, its called bounded parametric
+polymorphism. Inheritance doesnt exists as such, you can get a similar behaviour
+by adding traits to a certain type and sharing that trait with other types
+but its not like "inheriting" all its data and methods, encapsulation is
+obtained by using the pub keyword but thats it.
+
+
+structs and enums are different to objects in most languages, structs and enums
+store the data in one place and the implementation of the methods is at another
+one. Trait objects which are objects that implement a certain trait are more
+alike to common objects but you can't add that to them.
+
+
+trait objects differently to when we use generics or trait bounds, uses dynamic
+dispatch, this means the compiler as it cannot check all the type and produce
+static code for each one of those scenarios and know which method to call
+ it emits code at runtime so it can figure out which method to call. So rust
+adds pointers to the trait objects as to figure out which method it needs to
+call. This adds a runtime costa
+
+trait object constrints, they cannot have (the traits) methods that return Self
+and cannot have generic type parameters. It cannot return Self because 
+rust wont remember the exact type that implemented the whatever trait as soon
+as you use the trait object (think it as discarding) so it cannot go back and 
+look for what that Self refers to, same happens with generic type parameters
+once its used its out of mind given that this is all dynamic and not static.
