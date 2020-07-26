@@ -1,7 +1,8 @@
 pub struct Post {
     // dyn stands for dynamically check for X trait
     state: Option<Box<dyn State>>,
-    content: String
+    content: String,
+    approvals: u32
 }
 
 impl Post {
@@ -10,12 +11,21 @@ impl Post {
             // a new post has a state that is Some box that points to a type
             // of Draft, state is private so we cant change it from the API.
             state: Some(Box::new(Draft {})),
-            content: String::new()
+            content: String::new(),
+            approvals: 0
         }
     }
 
     pub fn add_text(&mut self, text: &str) {
-        self.content.push_str(text);
+        match &self.state {
+            Some(s) => {
+                if s.modifiable() {
+                    self.content.push_str(text);
+                }
+            },
+            _ => {}
+        }
+
     }
 
     pub fn content(&self) -> &str {
@@ -48,8 +58,18 @@ impl Post {
         // we use the previous state to 
         // obtain a new one. The none is necessary because Rust does not allow
         // us to have unpopulated fields in structs.
+        if self.approvals >= 2 {
+            if let Some(s) = self.state.take() {
+                self.state = Some(s.approve())
+            }
+        } else {
+            self.approvals += 1;
+        }
+    }
+
+    pub fn reject(&mut self) {
         if let Some(s) = self.state.take() {
-            self.state = Some(s.approve())
+            self.state = Some(s.reject())
         }
     }
 
@@ -62,6 +82,11 @@ trait State {
     fn content<'a>(&self, post: &'a Post) -> &'a str {
         ""
     }
+    fn approve(self: Box<Self>) -> Box<dyn State>;
+    fn reject(self: Box<Self>) -> Box<dyn State>;
+    fn modifiable(&self) -> bool {
+        false
+    }
 }
 
 struct Draft {}
@@ -72,8 +97,16 @@ impl State for Draft {
         Box::new(PendingReview {})
     }
 
-    fn approve(self: Box<Self) -> Box<dyn State> {
+    fn approve(self: Box<Self>) -> Box<dyn State> {
         self
+    }
+
+    fn reject(self: Box<Self>) -> Box<dyn State> {
+        self
+    }
+
+    fn modifiable(&self) -> bool {
+        true
     }
 }
 
@@ -88,6 +121,10 @@ impl State for PendingReview {
     fn approve(self: Box<Self>) -> Box<dyn State> {
         Box::new(Published {})
     }
+
+    fn reject(self: Box<Self>) -> Box<dyn State> {
+        Box::new(Draft {})
+    }
 }
 
 struct Published {}
@@ -98,12 +135,16 @@ impl State for Published {
         self
     }
 
-    fn approve(self: Box<Self) -> Box<dyn State> {
+    fn approve(self: Box<Self>) -> Box<dyn State> {
         self
     }
 
     fn content<'a>(&self, post: &'a Post) -> &'a str {
         &post.content
+    }
+
+    fn reject(self: Box<Self>) -> Box<dyn State> {
+        self
     }
 
 }
