@@ -1,0 +1,190 @@
+---- Patterns
+
+Patterns => { literals || destructured arrays || enums || tuples || structs ||
+              variables || wildcards || placeholders }
+
+commonly used in match expressions
+
+match VALUE {
+    PATT => EXPRESSION
+}
+
+if let PATT = val { EXPRESSION } [else {EXPR}] optional or [else if VAL {EXPR}] or 
+[else if let PATT {EXPRE}]
+
+
+match is more exhaustive than if let, meaning if let can not contemplate all
+cases while match requires the developer to handle all data.
+
+
+while let PATT, is a structure that runs X something while the pattern is 
+matched
+
+e.g 
+
+let mt stack = Vec::new();
+stack.push(1);
+stack.push(2);
+
+while let Some(top) = stack.pop() {
+    println!("{}", top);
+}
+
+for loops are also using patterns
+
+for x in y => for pattern in iterator
+
+other e.g.
+
+let v = vec!['a', 'b', 'c'];
+
+// (idx, val) is the pattern
+for (idx, val) in v.iter().enumerate() {
+    println!("{} is at idx", idx, val);
+}
+
+
+variable assignment
+
+let x = 5 => let PATTERN = EXPRESSION
+
+a better e.g
+
+let (x, y, z) = (1, 2, 3);
+
+but 
+// wont compile as the patternt doesnt match the expresion the tuple can not
+// be decompressed in two as the tuple has three values
+// a solution would be let (x, y, _) = (1, 2, 3);
+// we ignore the third, we could also use .. for this
+
+let (x, y) = (1, 2, 3);
+
+functions also use patterns
+
+fn foo(x: i32) {}
+
+// x is the pattern
+
+
+--- Refutability
+
+its the quality of a pattern, it can either be irrefutable meaning it may not
+match fully or refutable when the matchability must  be exact.
+
+the assingment of let x = 5 is irrefutable it will match any value
+
+
+if let Some(x) = blah is a refutable it will not match in certain scenarios 
+
+--- types of matching
+
+
+-- match literals
+
+let x = 1 {
+    1 => println!("1"),
+    2 => println!("2"),
+    _ => println!("whatever")
+}
+
+prints 1
+
+
+--- matching named variables
+
+let x = Some(5);
+let y = 10;
+
+match x {
+    Some(50) => println!("50"),
+    Some(y) => println!("Matched y {}", y);
+    _ => println!("any")
+}
+
+// this prints some(5) and 10
+println!("x {}, y {}", x, y);
+
+x is not inside the match pattern so it is not shadowed and exits in the outer
+the inner y dies when the scope of match finishes and returns to the outer one.
+
+this will print the second statement the one of Some(y), as it will print
+whatever is wrapped in a Some, the first doesn't match and this one does
+
+
+--- multi patterns [OR]
+
+
+let x = 1;
+
+match x {
+    1 | 2 => println!("one or two"),
+    _ => println!("any")
+}
+
+
+--- matching ranges of values
+
+
+let x = 5;
+
+match x {
+    1 ... 5 => println!("some num from 1 to 5");
+    _ => println!("any")
+}
+
+(ranges only work for char and numbers)
+
+
+let x = 'c';
+
+match x {
+   'a' ... 'j' => println!("first asciis"),
+   'k' ... 'z' => println!("late asciis")
+}
+
+
+---- patterns to destructure
+
+
+--- structs
+
+
+struct Point {
+    x: i32,
+    y: i32
+}
+
+
+fn main() {
+    let p = Point {x: 0, y: 7};
+    let Point {x: a, y: b} = p;
+    assert_eq!(0, a);
+    assert_eq!(7, b);
+}
+
+
+/// a shorthand
+
+fn main {
+    let p = Point {x: 0, y: 7};
+    let Point {x, y} = p;
+    assert_eq!(0, x);
+    assert_eq!(7, y);
+}
+
+using match
+
+
+fn main {
+    let p = Point {x: 0, y: 7};
+    match p {
+        Point {x, y: 0} => println!("ON the x axis"),
+        Point {x: 0, y} => println!("On the Y axis"),
+        Point {x, y} => println!("on neither axis!")
+    }
+    // will print the second statement
+}
+
+
+--- enums

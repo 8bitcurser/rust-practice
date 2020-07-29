@@ -1,4 +1,9 @@
+/target
 */target/*
+*/*/target/*
+*/*/Cargo.lock
 */Cargo.lock
 */.vs/*
 /.vs/*
+*/.DS_Store
+.DS_Store
