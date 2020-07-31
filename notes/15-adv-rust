@@ -1,0 +1,82 @@
+---- Unsafe rust
+
+Allows:
+
+* deference a raw pointer
+* call an unsafe function or method
+* access or modify a mutable static variable
+* implement unsafe traits
+
+using unsafe on a block, still checks for borrows and does all safety checks
+the only difference is that enables those 4 things.
+
+A good practice is wrapping unsafe code in a safe block and give it access 
+through a safe API.
+
+
+--- deference a raw pointer
+
+safe rust ensures references are valid always, unsafe rust on the other hand
+allows the existance of "raw pointers", they can be mut or inmut and are 
+written like
+
+*const T
+*mut T
+
+[* doesnt stand for deference it is part of the type name]
+
+in this context immutable means it can be directly assigned after being 
+deferenced.
+
+
+raw pointers are allowed to
+
+> skip borrowing rules by having immutable and 
+mutable pointers or mutiple mutable pointers to the same location.
+
+> they may not point to valid memory
+
+> may be null
+
+> they are not automatically cleaned up
+
+we could use them to obtain a greater performance or for interacting with 
+things rust usually doesnt apply like OS, languages, hardware, etc.
+
+
+e.g
+
+let mut num = 5;
+
+let r1 = &num as *cons i32;
+let r2 = &num as *mut i32;
+
+// we didnt need to mark as unsafe as raw pointers are allowed in safe code.
+// but they can not be deferenced
+
+
+in this case the reference comes from another one, so the ref is ok and will
+work
+
+let address = 0x012345usize;
+let r = address as *const i32;
+
+this will explode if we try to do something fishy with it as the address is
+invalid
+
+let mut num = 5;
+
+// without raw pointers this wouldn't have compiled as rust does not allow
+// mut and immut references to the same data to coexist as they may introduce
+// race conditions
+let r1 = &num as *cons i32;
+let r2 = &mut num as *mut i32;
+
+// we need the unsafe block to deference them
+unsafe {
+    println!("r1 is {}", *r1);
+    println!("r2 is {}", *r2);    
+}
+
+this is usually used when interfacing with C or when building safe abstractions
+
