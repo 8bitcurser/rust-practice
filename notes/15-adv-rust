@@ -80,3 +80,103 @@ unsafe {
 
 this is usually used when interfacing with C or when building safe abstractions
 
+
+--- calling unsafe function or method
+
+prefixing a function with unsafe indicates that some unsafe magic might be 
+going on inside and we read its doc and we are ok with it, but to call them we
+need to wrap them in an unsafe block
+
+e.g.
+
+unsafe fn dangerous() {}
+
+unsafe {
+    dangerous();
+}
+
+
+--- safe abstraction over unsafe code
+
+its common practice that we may wrap unsafe function inside a safe wrapper,
+this means the function may execute an unsafe block within it but the overall
+function is safe to use and be called without needing to wrap it again (the
+call) inside an unsafe block, this is the case of the split_at_mut which uses
+raw pointers to slice a vector in two parts and returns a vector for each 
+part, the unsafe block exists inside the method and for the user its safe and
+transparent
+
+--- using extern functions to call external code
+
+the extern keyword allows the creation and use of FFI (foreign function
+interface) which allows us to define methods that other languages might call,
+functions declares with an extern are always unsafe as they do not have and
+provide the data safe garantees of rust.
+
+e.g
+
+
+// the "C" is an ABI (application binary interface) it defines how to call
+// the function at assembly level, this is the most common and refers to the 
+// C lang
+extern "C" {
+    fn abs(input: i32) -> i32;
+}
+
+
+fn main(){
+    unsafe {
+        println!("Absolute value of -3 according to C: {}", abs(-3));
+    }
+}
+
+--- accesing or modifying a mutable static variable
+
+global variables aka static variables
+
+e.g
+// they get a static mem addr, diff to constants which are duplicated when the
+// data is used. also constants can be mutated while statics yes, but its 
+// unsafe
+static HELLO_WORLD: &str = "Hello World";
+fn main() {
+    println!("name is {}", HELLOW_WORLD);
+}
+
+
+e.g 2
+
+static mut COUNTER: u32 = 0;
+fn add_to_count(inc: u32) {
+    unsafe {
+        COUNTER += inc;
+    }
+}
+
+fn main(){
+    add_to_count(3);
+    // either reading and writing happens at the unsafety
+    unsafe {
+        println!("COUNTER: {}", COUNTER);
+    }
+}
+
+
+
+--- implementing unsafe traits.
+
+
+unsafe traits are those that have at least one of its methods with variants 
+that cant be verified
+
+
+unsafe trait Foo {
+    //
+}
+
+unsafe impl Foo for i32 {
+    // bleah
+}
+
+this would be the case if some method from the trait uses raw pointers then
+the whole trait should be unsafe.
