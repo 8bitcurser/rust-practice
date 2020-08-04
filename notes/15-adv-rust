@@ -180,3 +180,221 @@ unsafe impl Foo for i32 {
 
 this would be the case if some method from the trait uses raw pointers then
 the whole trait should be unsafe.
+
+
+---- Placeholder Type in Trait defintions with associated Types.
+
+It allows one to define a type inside the trait definition which can be used
+in one of the method definition signatures.
+
+
+e.g
+put trait Iterator {
+    // place holder type
+    type Item;
+    // signature using the type.
+    fn next(&mut self) -> Option<Self::Item>;
+}
+
+this associated types are similar to generics
+
+
+comparisson examaple:
+=======
+placeholder type.
+
+impl Iterator for Counter {
+    type Item = u32;
+    fn next(&mut self) -> Option<Self::Item> {
+        // ...
+    }
+}
+
+=======
+generics
+
+pub trait Iterator<T> {
+    fn next(&mut self) -> Option<T>;
+}
+
+
+the difference between them is that every time we implement the generic version
+we have to annotate the types for each implementation as the Generic could be
+whatever. This allows the type that implements the trait with generic parameters
+to implement it for multiple different types, when using the next method on 
+counter we will need to write type annotations to let the compiler know which
+implementation are we going to use.
+
+
+associated types are more specific when it comes to this, we dont need to 
+annotate the type cause we already set it at the place holder type, it will
+return whatever we define type to be on the implmementation and as we cant
+implement the trait multiple times on a type,
+ so it will exist only one implementation.
+
+--- default generic type parameters and operator overloading.
+
+generics may have a default type by doing <PlaceHolderType=ConcreteType>
+
+This is used on operator overloading, which is customizing the behaviour of an
+operator such as +.
+
+Rust blocks the capability of creating custom operators or overloading 
+arbitrary operators. Those one std::ops are overloadable if the corresponding
+trait is implemented.
+
+e.g
+
+use std::ops::Add;
+
+#[derivce(Debug, PartialEq)]
+struct Point {
+    x: i32,
+    y: i32
+}
+
+
+impl Add for Point {
+    type Output = Point;
+    fn add(self, other: Point) -> Point {
+        Point {
+            x: self.x + other.x,
+            y: self.y + other.y
+        }
+
+    }
+}
+
+
+fn main() {
+    assert_eq!(Point: {x: 1, y: 0} + Point {x: 2, y: 3},
+               Point {x: 3, y: 3});
+}
+
+
+how Add looks in the standard lib
+
+
+// default type parameter
+// the defult will be self and self is the type in which we are implementing
+// the trait
+trait Add<RHS=Self> {
+    type Output;
+    fn add(self, rhs: RHS) -> Self::Output;
+}
+
+
+a case where we specify a special RHS
+
+use std::ops::Add;
+
+struct Millimeters(u32);
+struct Meters(u32);
+
+// setting rhs
+impl Add<Meters> for Millimeters {
+    type Output = Millimeters;
+
+    fn add(self, other: Meters) -> Millimeters {
+        Millimeters(self.0 + (other.0 * 1000))
+    }
+}
+
+
+--- syntax for disambiguation: call methods with the same name
+
+
+two traits might have the a method with the same name, in those cases we need
+to tell rust which we want to use if both are implmented at the same type.
+
+
+trait Pilot {
+    fn fly(&self);
+}
+
+
+trait Wizard {
+    fn fly(&self);
+}
+
+struct Human;
+
+impl Pilot for Human {
+    fn fly(&self) {
+        println!(This is your captain speaking!");
+    }
+}
+
+
+impl Wizard for Human {
+    fn fly(&self) {
+        println!("Up!");
+    }
+}
+
+
+impl Human {
+    fn fly(&self) {
+        println!("*Shake arms like a chicken*);
+    }
+}
+
+
+fn main() {
+    let person = Human;
+    // this will call the fly that was implemented on the type as is the 
+    // default behavior to call the ones of the traits we need to be specific
+    person.fly();
+    Pilot::fly(&person);
+    Wizard::fly(&person);
+    Human::fly(&person); // would have done the same as line 347
+}
+
+
+-- case with associated fn on traits
+
+associated functions of tratis do not have the self parameters passed on to
+them, if two types implement the same trait and this trait has an associated 
+function and both types implement the function rust can not know which one of
+them call the function thats why we need to use fully qualified syntax.
+
+e.g
+
+
+trait Animal {
+    // associated function
+    fn baby_name() -> String;
+}
+
+struct Dog;
+
+impl Dog {
+    fn baby_name() -> String {
+        String::from("spot")
+    }
+}
+
+impl Animal for Dog {
+    fn baby_name() -> String {
+        String::from("puppy")
+    }
+}
+
+
+fn main() {
+    // this will print Spot which is not gooda
+    // we cant do Anima::baby_name as it is an asscoiated function and not a
+    // method so it doesnt have "self"
+    println!("A baby dog is called a {}", Dog::baby_name());
+    // this removes the ambiguity and tells rust it wants to use the baby name
+    // method implementation from the animal trait the dog type.
+    println!("A baby dog is called a {}", <Dog as Animal>::baby_name());
+}
+
+
+fully_qualified syntax = <Type as Trait>::function(receiver_if_method, args..)
+
+receiver is in the case this was not an associated function
+
+
+
