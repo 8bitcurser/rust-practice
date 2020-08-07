@@ -397,4 +397,149 @@ fully_qualified syntax = <Type as Trait>::function(receiver_if_method, args..)
 receiver is in the case this was not an associated function
 
 
+-- Super trait, require a functionality of another trait to implement ones
+   trait
 
+
+use std::fmt;
+
+// my trait requires the implementation of the display trait in order to work
+// and the method_x function to run.
+
+trait MyTrait: fmt::Display {
+    fn method_x(&self) {
+        // ...
+    }
+}
+
+struct Bleh {}
+
+// this will explode as Display hasn't been implemented for Bleh
+// impl MyTrait for Bleh {}
+impl fmt::Display for Bleh {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Bleh");
+    }
+}
+
+
+
+// now we can do
+
+impl MyTrait for Bleh {}
+
+
+-- new type pattern to implement ext traits on ext types
+
+previously we saw that either the type or the trait must be local to the crate
+in order to use something external, the new type pattern is a workaround to
+this, this pattern creates a new type within a tuple struct.
+This way we wrapp the new type within a local type
+
+the tuple struct has one field and is a thin wrapper around the type, and now
+we may implement the trait to the wrapper.
+
+this pattern has no runtime overhead, and the wrapper type is elided(ommited)
+at compile time
+
+
+use std::fmt;
+
+struct Wrapper(Vec<String>);
+
+impl fmt::Display for Wrapper {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+       write!(f, "[{}]", self.0.join(", "))
+    }
+}
+
+fn main() {
+    let w = Wrapper(vec![String::from("hello"), String::from("world")]);
+    println!("w = {}", w);
+}
+
+the downside is Wrapper is a type and therefor it doesnt have the methods from
+the inner type, to have them we have to implement them manually. A workaround
+this would be implementing the Deref trait on wrapper as to return the inner
+type on the wrapper.
+
+
+--- Advance types
+
+-- newtype pattern for type safety and abstracion
+
+if we implement two types that wrap a u32, and we make a function that takes
+the first type this function will never accept a plain u32 or the second type,
+making it safe.
+
+
+wrapping can also make for a safer api, by wrapping we can pick what we trully
+expose while keeping the inner type private with its methods, this pattern
+its neat for encapsulation
+
+
+--- type aliasing
+
+rust allows one to give a type another name.
+
+// we are aliasing i32 to Kilometers
+type Kilometers = i32;
+
+when we declare a var with the type kilometers it will be treated the same as 
+if it was an i32.
+
+its commonly used to remove lengthy type names such as 
+
+Box<dyn Fn() + Send + 'static>
+
+type Thunk = Box<dyn Fn() + Send + 'static>
+
+let f: Thunk = Box::new(|| println!("Hi"));
+
+also commonly used with Result<T, E>
+
+e.g
+
+
+use std::io::Error;
+use std::fmt;
+
+pub trait Write {
+    fn write(&mut self, buf: &[u8]) -> Result<usize, Error>;
+    fn flush(&mut self) -> Result<(), Error>;
+    fn write_all(&mut self, buf: &[u8]) -> Result<(), Error>;
+    fn write_fmt(&mut self, fmt: fmt::Arguments) -> Result<(), Error>;
+}
+
+type Result<T> = Result<T, std::io::Error>;
+
+// this will simplify it this way
+
+pub trait Write {
+    fn write(&mut self, buf: &[u8]) -> Result<usize>;
+    fn flush(&mut self) -> Result<()>;
+    fn write_all(&mut self, buf: &[u8]) -> Result<()>;
+    fn write_fmt(&mut self, fmt: fmt::Arguments) -> Result<()>;
+}
+
+Boila less code!
+
+
+--- the ! type
+
+this is the empty type which has no values, in rust is called the "never type"
+fn bar() -> ! {
+}
+its kinda equivalent to void, functions that return the never type are called
+divergent functions
+
+in match expressions we see this when if nothing is matched we may execute 
+a panic!, rust sees the ! and knows that that arm wont return anything and the
+proper return is the other arm.
+
+
+--- dynamically sized types
+
+
+DST or unsized types, are types which we can not know the final size in 
+compile time only in runtime, one of this examples is str
