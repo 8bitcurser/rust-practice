@@ -538,8 +538,131 @@ a panic!, rust sees the ! and knows that that arm wont return anything and the
 proper return is the other arm.
 
 
---- dynamically sized types
 
+--- dynamically sized types
 
 DST or unsized types, are types which we can not know the final size in 
 compile time only in runtime, one of this examples is str
+
+DSTs pointers store the starting position and the length of the slice (in the 
+case of &str) so the &str is actually two values the addr to the str and its 
+length. 
+
+DSTs have an extra bit of metadata that stores the size of the dynamic info
+
+golden rule:
+
+"For DST type we must put values of dynamically sized types behind a pointer of
+some kind" so a str can be paired with any pointer type such as Box and Rc. 
+
+Traits are also DST that we refer by name, when we create trait objects we 
+create them writing &dyn Trait or Box<dyn Trait> that is puting the type behid
+the data.
+
+
+So DST have this particularity where we kinda dont know their size right away
+so rust implements a trait Sized to determine whether a types size is known or
+not. The trait is automatically implemented for anything which size is known
+during compilation. This is also implmented on every generic function (meaning
+it uses generic parameters) meaning it will only work with arguments of a known
+size but we can relax this restriction by doing
+
+
+// notice that t: is a &T as we dont know its size we must put it behind a 
+// pointer
+fn generic <T: ?Sized>(t: &T) {} this sintax is ONLY available for Sized.
+
+
+--- Adv functions and closures.
+
+-- function pointers
+
+they allow one to pass a function as a parameter to another function
+
+
+e.g.
+
+// functins coerce to the type fn <- this is called a function pointer
+// fn types implement the three clousure traits Fn, FnMut, FnOnce
+fn add_one(x: i32) -> i32 {
+    x+1
+}
+
+fn do_twice(f: fn(i32) -> i32, arg: i32) -> i32 {
+    f(arg) + f(arg)
+}
+
+
+fn main() {
+    let answer = do_twice(add_one, 5);
+    println!("Called a function twice!");
+}
+
+
+as function pointers implmeent the three clousure traits we can pass it to
+functions that expect a closure. Its best to write a function using a gen type
+and one of the clousure traits so the function can accept either funcion or
+clousures.
+
+cases where we want fn rather than clousures is when interfacing with languages
+that do not have clousures like C
+
+
+clousures vs fn
+
+
+let list of numbers = vec![1, 2, 3];
+let list_of_strings: Vec<String> = list_of_numbers
+    .iter
+    .map(|i| i.to_string())
+    .collect();
+
+
+or
+
+let list_of_strings: Vec<String> = list_of_numbers
+    .iter()
+    // fully qualified syntax
+    .map(ToString::to_string())
+    .collect();
+
+
+both are valid and it depneds on the style of the coder.
+
+
+- exploiting tuple structs and tuple struct enums.
+
+this tuple like types use () as an initializer, similar to a fn call. The 
+initializers are actually functions that return a type with the data.
+This initializers can be used as function pointers that implement the clousure
+traits. This means we can use the initializer functions as args for methods that
+take clousures
+
+
+enum Status {
+    Value(u32),
+    Stop
+}
+
+
+let list_of_statuses: Vec<Status> = 
+    (0u32..20)
+    // we create a bunch of instances of the type Status::Value that take
+    // each value inside the range of the initializer, this sintax is pretty
+    // neat but not that verbose
+    .map(Status::Value)
+    .collect();
+
+
+-- Returning Clousures
+
+clousures are represented by traits therefor we can just return them. Usually
+to do it we return the type that implements them but clousures have no 
+specific type, so what we do is returning a dynamic type that implements the
+trait that makes a clousure be a clousure as
+
+fn returns_clousure() -> Box<dyn Fn(i32) -> i32> {
+    Box::new(|x| x + 1)
+}
+
+--- Macros
