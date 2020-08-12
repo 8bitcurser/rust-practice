@@ -758,3 +758,42 @@ they do not want it, the foo derive at the Cargo.toml must have a new section
 called [lib] and under it the proc-macro attribute = true.
 
 
+-- attribute like macros
+
+kinda like derive macros but instead of generating code they allow the creation
+of new attrs, and more flex. derive works only for structs and enums but this
+ones can go with anything like functions.
+
+e.g
+
+// by the framework it would be a procedural macro
+#[route(GET, "/")]
+fn index(){}
+
+
+in the framework it would look like this
+
+// the first TokenStream goes for the content of the attr (the GET)
+// the second is the body of the item the attr is attached to which is the 
+// signature and function body
+pub fn route(attr: TokenStream, item: TokenStream) -> TokenStream {}
+
+to use them you gotta do the same create a proc-macro crate type and implement
+a function that generates the code needed.
+
+
+-- function like macros
+
+they are like functions but more flexible and can take an undefine number of 
+arguments, the difference to the first kind of macros we talked about is that
+they take a TokenStream parameter which is manipulated 
+
+e.g.
+
+let sql = sql!("SELECT * FROM post WHERE id=1"0;
+
+this will take the statement and check its valid, this is way more complex than
+what macro_rules! can do (the first kind)
+
+#[proc_macro]
+pub fn sql(input: TokenStream) -> TokenStream {... bleh}
