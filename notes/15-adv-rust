@@ -666,3 +666,95 @@ fn returns_clousure() -> Box<dyn Fn(i32) -> i32> {
 }
 
 --- Macros
+
+Macros are code that generate code, in a way metaprogramming.
+
+there are 3 types of procedural macros
+
+. custom macros (used on struct on enums with the #[derive] key)
+. attribute like macros (this define custom attrs on any item)
+. function like macros (this work like functions calls but work on
+                        specific tokens)
+
+macros are useful to reduce the amount of code that needs to be generated,
+macros can take a variable number of parameters (different to functions where 
+we have to specify its amount) 
+
+e.g println!("hello")  or println!("{}", name);
+
+macros are expanded before the compiler interprets the meaning of the code so
+it can implement a trait on a type, a function cant do this because it gets
+called on runtime (traits are implemented during compile time).
+
+
+the downside of macros against functions is the increase in complexity when it
+comes to writing and maintaining them.
+
+Macros also MUST be declared before they are used, different to functions that 
+we can declares wherever.
+
+macros in rust also compare a value to a pattern, but in this cade the value
+is the code written in rust, the patterns are compared to the structure fo the 
+source code and the code associated to each pattern, when the match occurs
+the macro replaces that "value" with the new code. 
+
+this type of macro which are called 'declarative macros'
+
+e.g
+// vec is the declarative macro 
+let v: Vec<u32> = vec![1, 2, 3];
+
+an implementation of vec is kindaaa like this
+
+// means this should be made available whenver the crate that has the macro
+// defined is brought to scope.
+#[macro_export]
+macro_rules! vec {
+    // expr is a match all, then it comes the , and the * means all the
+    // repetitions of it
+        // everything inside the $() is the pattern
+    ( $( $x: expr ), * ) => {
+        let mut temp_vec = Vec::new();
+            // for each match of the pattern, do this.
+            $(
+                temp_vec.push($x);
+            )*
+        }
+    };
+
+}
+
+
+-- procedural macros generate code from attr
+
+accept code as input operate on that and ouput code, this does not match a 
+pattern and replace code. 
+
+procedural macros exist within their own crate which is of an special kind.
+
+e.g
+
+use proc_macro;
+
+
+#[some_attr]
+pub fn some_name(input: TokenStream) -> TokenStream {}
+
+
+a good use for this type of macros si when we commonly implement X trait on a
+series of types, this can become hard to maintain and trouble some at times.
+For this scenario we may generate a macro that implements that trait for us.
+
+check macro_trait project
+
+implementing a procedural macro for crate foo, requires us to create a special
+lib crate named foo_derive which should be inside the foo crate
+
+this structure allos users to implement the lib without the macro if they do
+not require it, but the downside is if we want to implement both we gotta
+add both to our cargo toml file, we could make foo import foo_derive and re 
+export foo_derive but it will force users to implement both of them even if
+they do not want it, the foo derive at the Cargo.toml must have a new section
+called [lib] and under it the proc-macro attribute = true.
+
+
